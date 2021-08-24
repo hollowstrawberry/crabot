@@ -1,4 +1,5 @@
 import discord
+import random
 from discord.ext import commands
 
 
@@ -32,17 +33,23 @@ class General(commands.Cog):
         """Sends information about the bot and its owner"""
         await ctx.send('This bot was made for fun in homage to my friend Grey. My owner is <@871733390251012147>')
 
+    @commands.command()
+    async def pain(self, ctx: commands.Context):
+        """Expresses pain"""
+        emote = random.choice(['<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>'])
+        await ctx.message.add_reaction(emote)
+
     @commands.command(aliases=["orange"])
     async def eat(self, ctx: commands.Context):
         """Eats"""
-        await ctx.message.add_reaction('🍊')
-        print('eat')
+        emote = random.choice('🍊', '🍩', '🍕')
+        await ctx.message.add_reaction(emote)
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: commands.Context):
         """Cries"""
-        await ctx.message.add_reaction('😭')
-        print('cry')
+        emote = random.choice('😢', '😭', '😿', '<:peeposad:757725678878851112>', '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>'])
+        await ctx.message.add_reaction(emote)
 
 
 class EmbedHelpCommand(commands.HelpCommand):
