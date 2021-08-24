@@ -1,4 +1,6 @@
+import inspect
 import discord
+import textwrap
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -17,6 +19,15 @@ class General(commands.Cog):
         await ctx.send(msg)
         print('say {msg}')
 
+    @commands.command(aliases=["python"])
+    async def code(self, ctx: Context, cmd):
+        """Sends the Python code that makes up a command"""
+        try:
+            code = inspect.getsource(self.bot.all_commands[cmd].callback)
+            code = textwrap.dedent(code).replace("```", "`")[:1990]
+            await ctx.send(f'```py\n{code}```')
+        except KeyError:
+            await ctx.send("Can't find a command with that name")
 
 class EmbedHelpCommand(commands.HelpCommand):
     COLOR = discord.Color(int('FCDF99', 16))

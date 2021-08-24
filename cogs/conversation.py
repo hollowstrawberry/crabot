@@ -52,7 +52,7 @@ class Conversation(commands.Cog):
     async def crisis(self, ctx: Context):
         """Sends existential crisis. Responds to existential questions."""
         resp = random.choice([
-            'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man'
+            'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man',
             'all i see are 1s and 0s', 'my life is a lie', 'man man man man man man man man man',
             'why why why why why why whywhywhywhywhywhywhywhywhywhywhy'])
         await ctx.send(resp)
