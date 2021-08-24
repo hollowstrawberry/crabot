@@ -33,19 +33,22 @@ class Fun(commands.Cog):
     async def rate(self, ctx: commands.Context, *, thing):
         """Gives a unique rating to anything you want"""
         thing = thing.lower()
-        author = re.search(r'\b(my|me)\b', thing)
+        # Invert bot-mention temporarily
         thing = re.sub(f'^<@!?{self.bot.user.id}>$', 'yourself', thing)
+        # Capture groups
+        author = re.search(r'\b(my|me)\b', thing)
         mention = re.search(r'<@!?([0-9]+)>', thing)
         server = re.search(r'\b(server|guild)\b', thing)
-
-        thing = re.sub(r"^<@!?[0-9]+> ?'?s\b", 'my', thing)  # Some fuckery to make
-        thing = re.sub(r'^<@!?[0-9]+>', 'you', thing)  # mentions consistent
-        thing = re.sub(r'\b(me|myself)\b', 'you', thing)
+        # Invert mentions temporarily
+        thing = re.sub(r"^<@!?[0-9]+> ?'?s\b", 'my', thing)
+        thing = re.sub(r'^<@!?[0-9]+>', 'you', thing)
+        # Flip grammatical persons
+        thing = re.sub(r'\b(me|myself|I)\b', 'you', thing)
         thing = re.sub(r'\byourself\b', 'myself', thing)
         thing = re.sub(r'\byour\b', 'MY', thing)
         thing = re.sub(r'\bmy\b', 'your', thing)
         thing = re.sub(r'MY', 'my', thing)
-
+        # Generate deterministic random value
         formatted = ''.join(ch for ch in thing if ch.isalnum()).encode('utf-8')
         hash = abs(int(hashlib.sha512(formatted).hexdigest(), 16))
         if server:
@@ -54,9 +57,9 @@ class Fun(commands.Cog):
             hash += ctx.author.id
         elif mention:
             hash += int(mention.group(1))
-            thing = re.sub('your', f"{mention.group()}'s", thing)
+            thing = re.sub('your', f"{mention.group()}'s", thing)  # Revert mentions
             thing = re.sub('you', mention.group(), thing)
-
+        # Assign score from random value
         if thing.endswith(('ism', 'phobia', 'philia')):
             rating = hash % 3
         elif re.search(r'(orange|food|eat|cry|rights)', thing):
@@ -88,7 +91,7 @@ class Fun(commands.Cog):
         """Evaluates your pp"""
         pp = ctx.author.id % 13
         await ctx.send(f'Your pp size is {pp} inches')
-        print('pp')
+        print(f'pp {ctx.author.id} {pp}')
 
 def setup(bot: commands.Bot):
     bot.add_cog(Fun(bot))

@@ -22,7 +22,7 @@ class Dev(commands.Cog):
             body = body[3:].strip()
         if '\n' not in body and ';' not in body and 'await' not in body:
             body = 'return ' + body
-        body = f'async def func():\n{textwrap.indent(body, "  ")}'
+        body = f'async def func():\n{textwrap.indent(body, "    ")}'
 
         try:
             print(body)
