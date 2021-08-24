@@ -2,16 +2,21 @@ import re
 import json
 import hashlib
 import aiohttp
+import discord
 from discord.ext import commands
+from discord.ext.commands import Context
 
 
 class Fun(commands.Cog):
     """Commands you might actually want to use"""
+    DONUT_FILE = "donuts.json"
+    REP_FILE = "reputation.json"
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
-    async def quick(self, ctx: commands.Context, *, query: commands.clean_content):
+    async def quick(self, ctx: Context, *, query: commands.clean_content):
         """Does a quick WolframAlpha query"""
         await ctx.channel.trigger_typing()
         async with aiohttp.ClientSession() as s:
@@ -30,7 +35,7 @@ class Fun(commands.Cog):
                 print(f"quick {query}")
 
     @commands.command()
-    async def rate(self, ctx: commands.Context, *, thing):
+    async def rate(self, ctx: Context, *, thing):
         """Gives a unique rating to anything you want"""
         thing = thing.lower()
         # Invert bot-mention temporarily
@@ -71,23 +76,58 @@ class Fun(commands.Cog):
         print(f'rate {thing} {rating}')
 
     @commands.command()
-    async def donut(self, ctx: commands.Context):
+    async def donut(self, ctx: Context):
         """Gives you a donut"""
         try:
-            with open('donuts.json', 'r') as file:
+            with open(self.DONUT_FILE, 'r') as file:
                 data = json.load(file)
         except FileNotFoundError:
-            with open('donuts.json', 'w+'):
+            with open(self.DONUT_FILE, 'w+'):
                 data = {}
         count = data.get(str(ctx.author.id), 0) + 1
         data[str(ctx.author.id)] = count
-        with open('donuts.json', 'w') as file:
+        with open(self.DONUT_FILE, 'w') as file:
             json.dump(data, file)
         await ctx.send(f'{count} 🍩')
         print(f'User {ctx.author.id} now has {count} donuts')
 
+    @commands.command(name="+1", aliases=["rep", "giverep"])
+    @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
+    async def rep(self, ctx: Context, user: discord.User):
+        """Gives a reputation point, you can give 1 per hour"""
+        if not user:
+            return await ctx.send("You must specify someone to give rep to...")
+        if user.id == ctx.author.id:
+            return await ctx.send("You can't give rep to yourself dummy")
+
+        try:
+            with open(self.REP_FILE, 'r') as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            with open(self.REP_FILE, 'w+'):
+                data = {}
+        count = data.get(str(user.id), 0) + 1
+        data[str(user.id)] = count
+        with open(self.REP_FILE, 'w') as file:
+            json.dump(data, file)
+        await ctx.send(f'{user.mention} +1 rep!')
+        print(f'User {ctx.author.id} now has {count} rep')
+
     @commands.command()
-    async def pp(self, ctx: commands.Context):
+    async def getrep(self, ctx: Context, user: discord.User = None):
+        """Gets the reputation points for a user"""
+        if not user:
+            user = ctx.author
+        try:
+            with open(self.REP_FILE, 'r') as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            data = {}
+        count = data.get(str(user.id), 0)
+        await ctx.send(f'{user.display_name} has {count} rep')
+
+    @commands.command()
+    async def pp(self, ctx: Context):
         """Evaluates your pp"""
         pp = ctx.author.id % 13
         await ctx.send(f'Your pp size is {pp} inches')
