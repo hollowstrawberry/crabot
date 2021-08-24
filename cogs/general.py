@@ -52,7 +52,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         return f'{command.qualified_name} {command.signature}'
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title='Bot Commands', colour=self.COLOUR)
+        embed = discord.Embed(title='Grey Commands', colour=self.COLOUR)
         description = self.context.bot.description
         if description:
             embed.description = description
