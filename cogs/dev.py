@@ -2,8 +2,9 @@ import os
 import io
 import traceback
 import textwrap
-from discord.ext import commands
 from contextlib import redirect_stdout
+from discord.ext import commands
+from discord.ext.commands import Context
 
 class Dev(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -11,7 +12,7 @@ class Dev(commands.Cog):
 
     @commands.command(aliases=["run"])
     @commands.is_owner()
-    async def eval(self, ctx, *, body: str):
+    async def eval(self, ctx: Context, *, body: str):
         """Evaluates a piece of code"""
         env = {'bot': self.bot, 'ctx': ctx}
         env.update(globals())
@@ -52,7 +53,7 @@ class Dev(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def reload(self, ctx: commands.Context):
+    async def reload(self, ctx: Context):
         """Reloads the bot's cogs"""
         for cog in tuple(self.bot.extensions.keys()):
             self.bot.reload_extension(cog)
@@ -60,7 +61,7 @@ class Dev(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def update(self, ctx: commands.Context):
+    async def update(self, ctx: Context):
         """Updates the bot then reloads the cogs"""
         # Update files from github
         stream = os.popen('git pull')
@@ -88,6 +89,11 @@ class Dev(commands.Cog):
             await ctx.send(f'```{output}```')
         else:
             await ctx.message.add_reaction('✅')
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: Context, error: commands.CommandError):
+        if isinstance(error, commands.NotOwner):
+            await ctx.message.add_reaction('❌')
 
 
 def setup(bot: commands.Bot):
