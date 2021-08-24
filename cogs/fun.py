@@ -97,8 +97,13 @@ class Fun(commands.Cog):
     async def rep(self, ctx: Context, user: discord.User = None):
         """Gives a reputation point, you can give 1 per hour"""
         if not user:
-            ctx.command.reset_cooldown(ctx)
-            return await ctx.send("You must specify someone to give rep to...")
+            if ctx.message.reference:
+                ref = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+                user = ref.author
+            else:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send("Reply to a message with this command to give rep, "
+                                      "or specify the person manually")
         if user.id == ctx.author.id:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send("You can't give rep to yourself dummy")
@@ -117,11 +122,11 @@ class Fun(commands.Cog):
         print(f'User {ctx.author.id} now has {count} rep')
 
     @rep.error
-    async def kick_error(self, ctx: Context, error: commands.CommandError):
+    async def rep_error(self, ctx: Context, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send("You already gave a rep in the last hour!")
 
-    @commands.command()
+    @commands.command(aliases=["showrep"])
     async def getrep(self, ctx: Context, user: discord.User = None):
         """Gets the reputation points for a user"""
         if not user:
