@@ -124,11 +124,13 @@ class Fun(commands.Cog):
         except FileNotFoundError:
             data = {}
         count = data.get(str(user.id), 0)
-        embed = discord.Embed(title=user.display_name, color=int('3B88C3', 16))
+
+        embed = discord.Embed(color=int('3B88C3', 16))
+        embed.set_author(name=user.display_name, icon_url=user.avatar_url)
         numemoji = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         num = "".join(numemoji[int(d)] for d in str(count))
-        embed.add_field(name='Reputation points', value=f'{num}')
-        await ctx.send(f'{user.display_name} has {count} reputation point{"s" if count != 1 else ""}')
+        embed.description = f'**Reputation points:** {num}'
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def pp(self, ctx: Context):
