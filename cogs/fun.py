@@ -76,6 +76,7 @@ class Fun(commands.Cog):
         print(f'rate {thing} {rating}')
 
     @commands.command()
+    @commands.cooldown(rate=5, per=5, type=commands.BucketType.channel)
     async def donut(self, ctx: Context):
         """Gives you a donut"""
         try:
