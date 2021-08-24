@@ -96,8 +96,10 @@ class Fun(commands.Cog):
     async def rep(self, ctx: Context, user: discord.User = None):
         """Gives a reputation point, you can give 1 per hour"""
         if not user:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send("You must specify someone to give rep to...")
         if user.id == ctx.author.id:
+            ctx.command.reset_cooldown(ctx)
             return await ctx.send("You can't give rep to yourself dummy")
 
         try:
