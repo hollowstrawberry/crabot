@@ -32,19 +32,19 @@ class General(commands.Cog):
 
     @commands.command()
     async def about(self, ctx: Context):
-        """Sends information about the bot and its owner"""
-        await ctx.send('This bot was made for fun in homage to my friend Grey. My owner is <@871733390251012147>')
+        """Describes myself. Responds to \"who are you/tell me about you/etc\""""
+        await ctx.send("I'm Grey, a bot made for fun in homage to human Grey. My owner is <@871733390251012147>")
 
     @commands.command()
     async def pain(self, ctx: Context):
-        """Expresses pain"""
+        """Reacts with pain"""
         emote = random.choice([
             '<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>'])
         await ctx.message.add_reaction(emote)
 
     @commands.command(aliases=["orange", "hungry", "devour", "snack"])
     async def eat(self, ctx: Context):
-        """Eats"""
+        """Reacts with food. Responds to \"you hungry/wanna eat/etc\""""
         emote = random.choice([
             '🍎',  '🍊', '🍋', '🍌', '🍉', '🫐', '🍓', '🍑', '🥭', '🍍', '🍅', '🥑', '🥦', '🥬', '🫑', '🥒', '🌽', '🥕',
             '🥔', '🥯', '🍞', '🥖', '🥨', '🧀', '🥞', '🧇', '🍗', '🌭', '🍔', '🌯', '🍟', '🍤', '🧋', '🍕'])
@@ -52,7 +52,7 @@ class General(commands.Cog):
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: Context):
-        """Cries"""
+        """Reacts with crying"""
         emote = random.choice([
             '😢', '😭', '😿', '<:peeposad:757725678878851112>',
             '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>'])
@@ -60,6 +60,7 @@ class General(commands.Cog):
 
     @commands.command()
     async def crisis(self, ctx: Context):
+        """Has an existential crisis. Responds to existential questions."""
         resp = random.choice([
             'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?',
             'all i see are 1s and 0s', 'my life is a lie'])
@@ -73,12 +74,15 @@ class General(commands.Cog):
         content = message.content[len(prefix):]
         ctx = await self.bot.get_context(message)
 
-        if re.match(r"(existential crisis|what are you|are you real|"
+        if re.match(r"(existential crisis|are you real|are you human|are you a bot|what is real"
                     r"what'? ?i?s the meaning of life|when will it end)", content):
             return await self.crisis(ctx)
 
-        if re.match(r"(you hungry|want a snack|wanna eat)", content):
+        if re.match(r"((a?re? )?y?o?u hu?ngry|(y?o?u )?want a snack|(y?o?u )?wanna eat)", content):
             return await self.eat(ctx)
+
+        if re.match(r"(who are you|what are you|tell me about you|what'? ?i?s your name)", content):
+            return await self.about(ctx)
 
     class EmbedHelpCommand(commands.HelpCommand):
         COLOR = discord.Color(int('FCDF99', 16))
