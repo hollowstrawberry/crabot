@@ -13,20 +13,13 @@ class Dev(commands.Cog):
     @commands.is_owner()
     async def eval(self, ctx, *, body: str):
         """Evaluates a piece of code"""
-        env = {
-            'bot': self.bot,
-            'ctx': ctx,
-            'channel': ctx.channel,
-            'author': ctx.author,
-            'guild': ctx.guild,
-            'message': ctx.message,
-        }
+        env = {'bot': self.bot, 'ctx': ctx}
         env.update(globals())
         stdout = io.StringIO()
 
         body = body.strip('` \n')
         if body.startswith('py\n'):
-            body = body[3:]
+            body = body[3:].strip()
         if '\n' not in body and ';' not in body and 'await' not in body:
             body = 'return ' + body
         body = f'async def func():\n{textwrap.indent(body, "  ")}'
@@ -41,7 +34,7 @@ class Dev(commands.Cog):
         try:
             with redirect_stdout(stdout):
                 ret = await func()
-        except Exception as e:
+        except:
             value = stdout.getvalue()
             await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
         else:
@@ -63,22 +56,39 @@ class Dev(commands.Cog):
         """Reloads the bot's cogs"""
         for cog in tuple(self.bot.extensions.keys()):
             self.bot.reload_extension(cog)
-        await ctx.message.add_reaction('\u2705')
+        await ctx.message.add_reaction('✅')
 
     @commands.command()
     @commands.is_owner()
     async def update(self, ctx: commands.Context):
         """Updates the bot then reloads the cogs"""
+        # Update files from github
         stream = os.popen('git pull')
         output = stream.read()
+        if 'Already up to date' in output:
+            output = ""
         cogs = tuple(self.bot.extensions.keys())
+        # Existing cogs
         for cog in cogs:
-            self.bot.reload_extension(cog)
+            try:
+                self.bot.reload_extension(cog)
+            except commands.ExtensionFailed as e:
+                output += f'\n\n{e}'
+        # New cogs
         for filename in os.listdir('./cogs'):
             newcog = f'cogs.{filename[:-3]}'
             if filename.endswith('.py') and newcog not in cogs:
-                self.bot.load_extension(newcog)
-        await ctx.send(f'```{output}```')
+                try:
+                    self.bot.load_extension(newcog)
+                except commands.NoEntryPointError:
+                    pass
+                except commands.ExtensionFailed as e:
+                    output += f'\n\n{e}'
+        if output:
+            await ctx.send(f'```{output}```')
+        else:
+            await ctx.message.add_reaction('✅')
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Dev(bot))
