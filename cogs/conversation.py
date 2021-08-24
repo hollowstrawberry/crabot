@@ -77,7 +77,7 @@ class Conversation(commands.Cog):
             return await self.crisis(ctx)
 
         if re.match(r"((a?re? )?y?o?u hu?ngry|(y?o?u )?want a snack|(y?o?u )?wanna eat"
-                    r"|(y?o?u )?(want ?t?o?|wanna) (have|eat|get|grab)? ?(some)? ?(lunch|breakfast|dinner|brunch)) ?\??",
+                    r"|y?o?u? ?(want ?t?o?|wanna|let's) (have|eat|get|grab)? ?(some)? ?(lunch|breakfast|dinner|brunch)) ?\??",
                     content):
             return await self.eat(ctx)
 
