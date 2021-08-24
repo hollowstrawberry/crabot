@@ -68,7 +68,7 @@ class General(commands.Cog):
         prefix = await self.bot.get_prefix(message)
         if not message.content.startswith(prefix):
             return
-        content = message.content.removeprefix(prefix)
+        content = message.content[len(prefix):]
         ctx = await self.bot.get_context(message)
 
         if re.match(r"(existential crisis|what are you|are you real|"
