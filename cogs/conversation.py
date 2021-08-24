@@ -84,7 +84,8 @@ class Conversation(commands.Cog):
         if re.match(r"(who a?re? y?o?u|what a?re? y?o?u|tell me about y?o?u|what'? ?i?s y?o?ur name) ?\??", content):
             return await self.about(ctx)
 
-        if re.match(r"(how a?re? y?o?u|a?re? y?o?u (sad|fine|happy|okay|depressed)) ?\??", content):
+        if re.match(r"(how a?re? y?o?u|a?re? y?o?u (sad|fine|happy|okay|depressed)"
+                    r"|shut|shut up|stfu|shut the fuck up|silence|shut your mouth|stop talking) ?\??", content):
             return await self.cry(ctx)
 
 def setup(bot: commands.Bot):
