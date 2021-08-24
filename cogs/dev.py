@@ -71,8 +71,13 @@ class Dev(commands.Cog):
         """Updates the bot then reloads the cogs"""
         stream = os.popen('git pull')
         output = stream.read()
-        for cog in tuple(self.bot.extensions.keys()):
+        cogs = tuple(self.bot.extensions.keys())
+        for cog in cogs:
             self.bot.reload_extension(cog)
+        for filename in os.listdir('./cogs'):
+            newcog = f'cogs.{filename[:-3]}'
+            if filename.endswith('.py') and newcog not in cogs:
+                self.bot.load_extension(newcog)
         await ctx.send(f'```{output}```')
 
 def setup(bot: commands.Bot):

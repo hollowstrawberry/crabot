@@ -9,7 +9,7 @@ def get_prefix(bot: commands.Bot, message):
     m = re.match(fr'^({prefix}|<@!?{bot.user.id}>) ?', message.content, re.IGNORECASE)
     return m.group() if m else prefix
 
-bot = commands.Bot(command_prefix=get_prefix, description="This is Grey Bot")
+bot = commands.Bot(command_prefix=get_prefix)
 
 with open('bot.config') as f:
     bot.config = json.load(f)
