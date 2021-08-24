@@ -42,7 +42,7 @@ class General(commands.Cog):
     @commands.command(aliases=["orange"])
     async def eat(self, ctx: commands.Context):
         """Eats"""
-        emote = random.choice(['🍊', '🍩', '🍕'])
+        emote = random.choice(['🍊', '🍩', '🍕', '🍗'])
         await ctx.message.add_reaction(emote)
 
     @commands.command(aliases=["sad"])
