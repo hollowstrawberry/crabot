@@ -42,13 +42,13 @@ class General(commands.Cog):
     @commands.command(aliases=["orange"])
     async def eat(self, ctx: commands.Context):
         """Eats"""
-        emote = random.choice('🍊', '🍩', '🍕')
+        emote = random.choice(['🍊', '🍩', '🍕'])
         await ctx.message.add_reaction(emote)
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: commands.Context):
         """Cries"""
-        emote = random.choice('😢', '😭', '😿', '<:peeposad:757725678878851112>', '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>'])
+        emote = random.choice(['😢', '😭', '😿', '<:peeposad:757725678878851112>', '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>'])
         await ctx.message.add_reaction(emote)
 
 
