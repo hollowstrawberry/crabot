@@ -46,17 +46,13 @@ class General(commands.Cog):
 
 
 class EmbedHelpCommand(commands.HelpCommand):
-    COLOUR = discord.Colour(int('FCDF99', 16))
+    COLOR = discord.Color(int('FCDF99', 16))
 
     def get_command_signature(self, command):
         return f'{command.qualified_name} {command.signature}'
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title='Grey Commands', colour=self.COLOUR)
-        description = self.context.bot.description
-        if description:
-            embed.description = description
-
+        embed = discord.Embed(title='Grey Commands', colour=self.COLOR)
         for cog, cmds in mapping.items():
             name = 'No Category' if cog is None else cog.qualified_name
             filtered = await self.filter_commands(cmds, sort=True)
@@ -67,10 +63,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_cog_help(self, cog):
-        embed = discord.Embed(title=f'{cog.qualified_name} Commands', colour=self.COLOUR)
-        if cog.description:
-            embed.description = cog.description
-
+        embed = discord.Embed(title=f'{cog.qualified_name} Commands', colour=self.COLOR, description=cog.description)
         filtered = await self.filter_commands(cog.get_commands(), sort=True)
         for command in filtered:
             embed.add_field(name=self.get_command_signature(command), value=command.short_doc or '...', inline=False)
@@ -78,7 +71,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group):
-        embed = discord.Embed(title=group.qualified_name, colour=self.COLOUR)
+        embed = discord.Embed(title=group.qualified_name, colour=self.COLOR)
         if group.help:
             embed.description = group.help
 
