@@ -1,3 +1,4 @@
+import os
 import io
 import traceback
 import textwrap
@@ -59,10 +60,20 @@ class Dev(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def reload(self, ctx: commands.Context):
-        """Reloads the bot"""
+        """Reloads the bot's cogs"""
         for cog in tuple(self.bot.extensions.keys()):
             self.bot.reload_extension(cog)
         await ctx.message.add_reaction('\u2705')
+
+    @commands.command()
+    @commands.is_owner()
+    async def update(self, ctx: commands.Context):
+        """Updates the bot then reloads the cogs"""
+        stream = os.popen('git pull')
+        output = stream.read()
+        for cog in tuple(self.bot.extensions.keys()):
+            self.bot.reload_extension(cog)
+        await ctx.send(f'```{output}```')
 
 def setup(bot: commands.Bot):
     bot.add_cog(Dev(bot))
