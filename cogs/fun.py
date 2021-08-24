@@ -48,10 +48,10 @@ class Fun(commands.Cog):
 
         formatted = ''.join(ch for ch in thing if ch.isalnum()).encode('utf-8')
         hash = abs(int(hashlib.sha512(formatted).hexdigest(), 16))
-        if author:
-            hash += ctx.author.id
         if server:
             hash += ctx.guild.id
+        if author:
+            hash += ctx.author.id
         elif mention:
             hash += int(mention.group(1))
             thing = re.sub('your', f"{mention.group()}'s", thing)
