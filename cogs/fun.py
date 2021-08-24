@@ -129,7 +129,7 @@ class Fun(commands.Cog):
         embed.set_author(name=user.display_name, icon_url=user.avatar_url)
         numemoji = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         num = "".join(numemoji[int(d)] for d in str(count))
-        embed.add_field(name='Reputation points', value=f'{num}')
+        embed.description = f'**Reputation points:** {num}'
         await ctx.send(embed=embed)
 
     @commands.command()
