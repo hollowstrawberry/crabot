@@ -33,7 +33,8 @@ class General(commands.Cog):
     @commands.command()
     async def about(self, ctx: Context):
         """Describes myself. Responds to \"who are you/tell me about you/etc\""""
-        await ctx.send("I'm Grey, a bot made for fun in homage to human Grey. My owner is <@871733390251012147>")
+        await ctx.send("I'm Grey, a bot made for fun in homage to my friend Human Grey. "
+                       "My owner is <@871733390251012147>")
 
     @commands.command()
     async def pain(self, ctx: Context):
@@ -81,7 +82,7 @@ class General(commands.Cog):
         if re.match(r"((a?re? )?y?o?u hu?ngry|(y?o?u )?want a snack|(y?o?u )?wanna eat)", content):
             return await self.eat(ctx)
 
-        if re.match(r"(who are you|what are you|tell me about you|what'? ?i?s your name)", content):
+        if re.match(r"(who a?re? y?o?u|what a?re? y?o?u|tell me about y?o?u|what'? ?i?s y?o?ur name)", content):
             return await self.about(ctx)
 
     class EmbedHelpCommand(commands.HelpCommand):
