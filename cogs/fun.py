@@ -93,7 +93,7 @@ class Fun(commands.Cog):
 
     @commands.command(name="+1", aliases=["rep", "giverep"])
     @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
-    async def rep(self, ctx: Context, user: discord.User):
+    async def rep(self, ctx: Context, user: discord.User = None):
         """Gives a reputation point, you can give 1 per hour"""
         if not user:
             return await ctx.send("You must specify someone to give rep to...")
@@ -112,6 +112,11 @@ class Fun(commands.Cog):
             json.dump(data, file)
         await ctx.send(f'{user.mention} +1 rep!')
         print(f'User {ctx.author.id} now has {count} rep')
+
+    @rep.error
+    async def kick_error(self, ctx: Context, error: commands.CommandError):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send("You already gave a rep in the last hour!")
 
     @commands.command()
     async def getrep(self, ctx: Context, user: discord.User = None):
