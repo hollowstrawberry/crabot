@@ -39,7 +39,9 @@ class General(commands.Cog):
         emote = random.choice(['<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>'])
         await ctx.message.add_reaction(emote)
 
-    @commands.command(aliases=["orange"])
+    @commands.command(aliases=[
+            "orange", "hungry", "devour", "snack",
+            "are you hungry", "are you hungry?", "wanna eat", "wanna eat?"])
     async def eat(self, ctx: commands.Context):
         """Eats"""
         emote = random.choice(['🍊', '🍩', '🍕', '🍗'])
@@ -50,6 +52,18 @@ class General(commands.Cog):
         """Cries"""
         emote = random.choice(['😢', '😭', '😿', '<:peeposad:757725678878851112>', '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>'])
         await ctx.message.add_reaction(emote)
+
+    @commands.command(aliases=[
+            "crisis", "existential crisis", "have an existential crisis", "what are you", "what are you?",
+            "are you real", "are you real?", "what is the meaning of life", "what's the meaning of life",
+            "what is the meaning of life?", "what's the meaning of life?",
+            "when will it end", "when will it end?"])
+    async def panic(self, ctx: commands.Context):
+        """Panics"""
+        msg = random.choice([
+            'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?',
+            'all i see are 1s and 0s', 'my life is a lie'])
+        await ctx.send(msg)
 
 
 class EmbedHelpCommand(commands.HelpCommand):
