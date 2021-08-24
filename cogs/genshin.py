@@ -5,27 +5,31 @@ from discord.ext import commands
 
 genshin_file = "genshin.json"
 
-wish_img = "https://cdn.discordapp.com/attachments/541768631445618689/818649843202916362/unknown.png"
 moment_of_bloom = {
     "5starfeatured": ["Hu Tao"],
     "5star": ["Keqing", "Mona", "Qiqi", "Diluc", "Jean"],
     "5starweapon": [],
     "4starfeatured": ["Chongyun", "Xingqiu", "Xiangling"],
-    "4star": ["Xinyan", "Sucrose", "Diona", "Noelle", "Bennett", "Fischl", "Ningguang", "Beidou", "Razor",
-              "Barbara"],
-    "4starweapon": ["Rust", "Sacrificial Bow", "The Stringless", "Favonius Warbow", "Eye of Perception",
-                    "Sacrificial Fragments", "The Widsith", "Favonius Codex", "Favonius Lance", "Dragon's Bane",
-                    "Rainslasher", "Sacrificial Greatsword", "The Bell", "Favonius Greatsword", "Lions Roar",
-                    "Sacrificial Sword", "The Flute", "Favonius Sword"],
-    "3star": ["Slingshot", "Sharpshooter's Oath", "Raven Bow", "Emerald Orb", "Thrilling Tales of Dragon Slayers",
-              "Magic Guide", "Black Tassel", "Debate Club", "Bloodtainted Greatsword", "Ferrous Shadow",
-              "Skyrider Sword", "Harbinger of Dawn", "Cool Steel"]
+    "4star": [
+        "Xinyan", "Sucrose", "Diona", "Noelle", "Bennett", "Fischl", "Ningguang", "Beidou", "Razor", "Barbara"],
+    "4starweapon": [
+        "Rust", "Sacrificial Bow", "The Stringless", "Favonius Warbow", "Eye of Perception",
+        "Sacrificial Fragments", "The Widsith", "Favonius Codex", "Favonius Lance", "Dragon's Bane",
+        "Rainslasher", "Sacrificial Greatsword", "The Bell", "Favonius Greatsword", "Lions Roar",
+        "Sacrificial Sword", "The Flute", "Favonius Sword"],
+    "3star": [
+        "Slingshot", "Sharpshooter's Oath", "Raven Bow", "Emerald Orb", "Thrilling Tales of Dragon Slayers",
+        "Magic Guide", "Black Tassel", "Debate Club", "Bloodtainted Greatsword", "Ferrous Shadow",
+        "Skyrider Sword", "Harbinger of Dawn", "Cool Steel"]
 }
 fivestars = moment_of_bloom["5star"] + moment_of_bloom["5starfeatured"] + moment_of_bloom["5starweapon"]
 fourstars = moment_of_bloom["4star"] + moment_of_bloom["4starfeatured"] + moment_of_bloom["4starweapon"]
 pull_img = {
     "Hu Tao": "https://cdn.discordapp.com/attachments/541768631445618689/818653017892061194/unknown.png"
 }
+wish_img = "https://cdn.discordapp.com/attachments/541768631445618689/818649843202916362/unknown.png"
+wish_img4 = "https://media.discordapp.net/attachments/541768631445618689/879785351579832371/wish4.png"
+wish_img5 = "https://cdn.discordapp.com/attachments/541768631445618689/879785356382330901/wish5.png"
 
 
 class Genshin(commands.Cog):
@@ -106,7 +110,7 @@ class Genshin(commands.Cog):
         """Makes 1 Genshin Impact wish (Hu Tao banner)"""
         pulled = self.pullx(str(ctx.author.id), 1)[0]
         embed = discord.Embed(title="Your pull", description=self.formatitem(pulled), color=0xff0000)
-        embed.set_thumbnail(url=wish_img)
+        embed.set_thumbnail(url=wish_img5 if pulled in fivestars else wish_img4 if pulled in fourstars else wish_img)
         embed.set_image(url=pull_img.get(pulled, ""))
         await ctx.send(embed=embed)
 
@@ -114,10 +118,12 @@ class Genshin(commands.Cog):
     async def pull10(self, ctx: commands.Context):
         """Makes 10 Genshin Impact wishes (Hu Tao banner)"""
         pulled = self.pullx(str(ctx.author.id), 10)
-        pulled = "\n".join(self.formatitem(p) for p in pulled)
-        embed = discord.Embed(title="Your pulls", description=f"```md\n{pulled}```", color=0xff0000)
-        embed.set_thumbnail(url=wish_img)
+        pulledf = "\n".join(self.formatitem(p) for p in pulled)
+        embed = discord.Embed(title="Your pulls", description=f"```md\n{pulledf}```", color=0xff0000)
+        embed.set_thumbnail(url=wish_img5 if any(p in fivestars for p in pulled) else
+                            wish_img4 if any(p in fourstars for p in pulled) else wish_img)
         embed.set_image(url=next((pull_img.get(p) for p in pulled if p in pull_img), ""))
+
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["inventory"])
