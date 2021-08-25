@@ -167,9 +167,6 @@ class Fun(commands.Cog):
         cv2.imwrite(self.IMG_OUT, result)
         await ctx.send(file=discord.File(self.IMG_OUT))
         # kill
-        cv2.imshow("IMAGE", img)
-        cv2.imshow("OPEN", morph)
-        cv2.imshow("RESULT", result)
         cv2.destroyAllWindows()
         os.remove(self.IMG_DL)
         os.remove(self.IMG_OUT)
