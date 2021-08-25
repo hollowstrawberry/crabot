@@ -100,7 +100,7 @@ class Fun(commands.Cog):
         data[str(ctx.author.id)] = count
         with open(self.DONUT_FILE, 'w') as file:
             json.dump(data, file)
-        hash = abs(int(hashlib.sha256(count).hexdigest(), 16))
+        hash = abs(int(hashlib.sha256(bytes(count)).hexdigest(), 16))
         donut = self.donuts[hash % len(self.donuts)]
         await ctx.send(f'{count} {donut}')
         print(f'User {ctx.author.id} now has {count} donuts')
