@@ -166,8 +166,6 @@ class Fun(commands.Cog):
         # save and send
         cv2.imwrite(self.IMG_OUT, result)
         await ctx.send(file=discord.File(self.IMG_OUT))
-        # kill
-        cv2.destroyAllWindows()
         os.remove(self.IMG_DL)
         os.remove(self.IMG_OUT)
         print(f"Successfully painted user {user.id}")
