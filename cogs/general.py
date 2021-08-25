@@ -12,16 +12,18 @@ class General(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
-    @commands.bot_has_permissions(manage_messages=True)
     async def say(self, ctx: Context, *, msg):
-        """Says something. Requires Manage Messages permission."""
-        await ctx.message.delete()
+        """Repeats something you say. Only works for moderators"""
+        try:
+            await ctx.message.delete()
+        except:
+            pass
         await ctx.send(msg)
         print('say {msg}')
 
     @commands.command(aliases=["python"])
     async def code(self, ctx: Context, cmd):
-        """Sends the Python code that makes up a command"""
+        """Sends the code that makes up a command of this bot"""
         try:
             code = inspect.getsource(self.bot.all_commands[cmd].callback)
             code = textwrap.dedent(code).replace("```", "`")[:1990]
