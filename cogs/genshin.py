@@ -106,7 +106,7 @@ class Genshin(commands.Cog):
         return f'{item}{" ⭐⭐⭐⭐⭐" if item in fivestars else ""}{" ⭐⭐⭐⭐" if item in fourstars else ""}'
 
     @commands.command(aliases=["pull", "wish"])
-    async def pull1(self, ctx: commands.Context, *, etc = ""):
+    async def pull1(self, ctx: commands.Context, *, etc=""):
         """Makes 1 Genshin Impact wish (Hu Tao banner)"""
         if etc == '10':
             return await self.pull10(ctx)
