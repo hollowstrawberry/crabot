@@ -106,8 +106,10 @@ class Genshin(commands.Cog):
         return f'{item}{" ⭐⭐⭐⭐⭐" if item in fivestars else ""}{" ⭐⭐⭐⭐" if item in fourstars else ""}'
 
     @commands.command(aliases=["pull", "wish"])
-    async def pull1(self, ctx: commands.Context):
+    async def pull1(self, ctx: commands.Context, *, etc = ""):
         """Makes 1 Genshin Impact wish (Hu Tao banner)"""
+        if etc == '10':
+            return await self.pull10(ctx)
         pulled = self.pullx(str(ctx.author.id), 1)[0]
         embed = discord.Embed(title="Your pull", description=self.formatitem(pulled), color=0xff0000)
         embed.set_thumbnail(url=wish_img5 if pulled in fivestars else wish_img4 if pulled in fourstars else wish_img)
