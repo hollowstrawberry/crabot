@@ -114,7 +114,7 @@ class Conversation(commands.Cog):
                     r"|fuck y?o?u|i hate y?o?u|i h8 y?o?u|fuck off|y?o?u suck) ?\??", content):
             return await self.cry(ctx)
 
-        if re.match(r"(y?o?u'? ?a?re? (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*)", content):
+        if re.match(r"((y?o?u'? ?a?re?|'?i?s) (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*)", content):
             return await self.blush(ctx)
 
 
