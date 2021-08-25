@@ -2,6 +2,9 @@ donuts.json
 genshin.json
 bot.config
 config.json
+token.json
+tokens.json
+reputation.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

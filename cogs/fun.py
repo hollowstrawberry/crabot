@@ -22,7 +22,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as s:
             async with s.get(
                     'https://api.wolframalpha.com/v2/result',
-                    params={'i': query, 'appid': self.bot.config['wolfram']}
+                    params={'i': query, 'appid': self.bot.token['wolfram']}
             ) as res:
                 text = await res.text()
                 if text == "No short answer available":

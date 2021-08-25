@@ -11,9 +11,8 @@ def get_prefix(bot: commands.Bot, message):
 
 bot = commands.Bot(command_prefix=get_prefix)
 
-with open('bot.config') as f:
-    bot.config = json.load(f)
-
+with open('token.json') as f:
+    bot.token = json.load(f)
 
 @bot.event
 async def on_ready():
@@ -27,4 +26,4 @@ for filename in os.listdir('./cogs'):
         except commands.NoEntryPointError:
             pass
 
-bot.run(bot.config['discord'])
+bot.run(bot.token['discord'])
