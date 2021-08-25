@@ -1,16 +1,22 @@
+import os
 import re
 import json
 import hashlib
 import aiohttp
 import discord
+import cv2
+from PIL import Image
 from discord.ext import commands
 from discord.ext.commands import Context
+from typing import Union
 
 
 class Fun(commands.Cog):
     """Commands you might actually want to use"""
     DONUT_FILE = "donuts.json"
     REP_FILE = "reputation.json"
+    IMG_DL = "download.png"
+    IMG_OUT = "output.jpg"
     donuts = [
         "<:bluedonut:879880267391705089>", "<:plaindonut:879880268431892560>",
         "<:greendonut:879880268482232331>", "<:chocchocdonut:879880268658380840>",
@@ -139,6 +145,36 @@ class Fun(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send("You already gave a rep in the last hour!")
 
+    @commands.command(aliases=["paintme", "paint", "drawme"])
+    async def draw(self, ctx: Context, user: Union[discord.User, str] = None):
+        """Produces a painting of you or someone else"""
+        if user == "me" or user is None:
+            user = ctx.author
+        elif user == "you" or user == "yourself":
+            user = self.bot.user
+        elif isinstance(user, str):
+            return await ctx.send("who?")
+        # load image
+        await user.avatar_url.save(self.IMG_DL)
+        Image.open(self.IMG_DL).convert('RGB').resize((256, 256), Image.BICUBIC).save(self.IMG_OUT)
+        img = cv2.imread(self.IMG_OUT, cv2.IMREAD_COLOR)
+        # apply morphology open to smooth the outline
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
+        morph = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+        # brighten dark regions
+        result = cv2.normalize(morph, None, 20, 255, cv2.NORM_MINMAX)
+        # save and send
+        cv2.imwrite(self.IMG_OUT, result)
+        await ctx.send(file=discord.File(self.IMG_OUT))
+        # kill
+        cv2.imshow("IMAGE", img)
+        cv2.imshow("OPEN", morph)
+        cv2.imshow("RESULT", result)
+        cv2.destroyAllWindows()
+        os.remove(self.IMG_DL)
+        os.remove(self.IMG_OUT)
+        print(f"Successfully painted user {user.id}")
+
     @commands.command(aliases=["showrep"])
     async def getrep(self, ctx: Context, user: discord.User = None):
         """Gets the reputation points for a user"""
@@ -152,7 +188,7 @@ class Fun(commands.Cog):
         count = data.get(str(user.id), 0)
 
         embed = discord.Embed(color=int('3B88C3', 16))
-        embed.set_author(name=user.display_name, icon_url=user.avatar_url)
+        embed.set_author(name=user.display_name, icon_url=str(user.avatar_url))
         numemoji = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         num = "".join(numemoji[int(d)] for d in str(count))
         embed.description = f'**Reputation points:** {num}'
