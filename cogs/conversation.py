@@ -63,6 +63,11 @@ class Conversation(commands.Cog):
         resp = random.choice(self.crisis_msgs)
         await ctx.send(resp)
 
+    @commands.command(aliases=["horni", "flush", "flushed"], hidden=True)
+    async def horny(self, ctx: Context):
+        emote = random.choice(["😳", "<:bigflush:756867044846075955>", "<:viviflushed:757564758529540206>"])
+        await ctx.message.add_reaction(emote)
+
     @commands.command()
     async def about(self, ctx: Context):
         """Describe myself. Responds to *who are you/tell me about you/etc*"""
