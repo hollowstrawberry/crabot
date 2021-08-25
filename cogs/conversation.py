@@ -51,7 +51,7 @@ class Conversation(commands.Cog):
 
     @commands.command(aliases=["orange", "hungry", "devour", "snack"])
     async def eat(self, ctx: Context):
-        """Sends food. Responds to *you hungry/wanna eat/etc*"""
+        """Sends food. Also works with *you hungry/wanna eat/etc*"""
         emote = random.choice(self.food_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
@@ -60,7 +60,7 @@ class Conversation(commands.Cog):
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: Context):
-        """Sends crying. Responds to *how are you/you suck/etc*"""
+        """Sends crying. Also works with *how are you/you suck/etc*"""
         emote = random.choice(self.cry_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
@@ -69,13 +69,13 @@ class Conversation(commands.Cog):
 
     @commands.command()
     async def crisis(self, ctx: Context):
-        """Sends existential crisis. Responds to existential questions"""
+        """Sends existential crisis. Also works with existential questions"""
         resp = random.choice(self.crisis_msgs)
         await ctx.send(resp)
 
-    @commands.command(aliases=["horny", "horni", "flush", "flushed"], hidden=True)
+    @commands.command(aliases=["horny", "horni", "flush", "flushed", "cute", "nice", "awesome", "cool", "pretty"])
     async def blush(self, ctx: Context):
-        """Sends blush. Responds to compliments"""
+        """Sends blush. Also works if you tell compliments"""
         emote = random.choice(self.blush_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
@@ -114,7 +114,8 @@ class Conversation(commands.Cog):
                     r"|fuck y?o?u|i hate y?o?u|i h8 y?o?u|fuck off|y?o?u suck) ?\??", content):
             return await self.cry(ctx)
 
-        if re.match(r"((y?o?u'? ?a?re?|'?i?s) (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*)", content):
+        if re.match(r"((y?o?u'? ?a?re?|'?i?s) (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*|you rock)",
+                    content):
             return await self.blush(ctx)
 
 
