@@ -28,7 +28,7 @@ class Fun(commands.Cog):
 
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
     async def quick(self, ctx: Context, *, query: commands.clean_content):
-        """Does a quick WolframAlpha query"""
+        """Get answers to many questions thanks to WolframAlpha"""
         await ctx.channel.trigger_typing()
         async with aiohttp.ClientSession() as s:
             async with s.get(
