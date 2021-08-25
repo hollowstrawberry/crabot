@@ -9,11 +9,19 @@ class Conversation(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(aliases=["hello", "sup"])
-    async def hi(self, ctx: Context):
-        """Greets"""
-        resp = random.choice(['hi!', 'hello', 'hey'])
-        await ctx.send(resp)
+    hi_msgs = ['hi!', 'hello', 'hey']
+    pain_emotes = [
+        '<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>']
+    food_emotes = [
+        '🍎', '🍊', '🍋', '🍌', '🍉', '🫐', '🍓', '🍑', '🥭', '🍍', '🍅', '🥑', '🥦', '🥬', '🫑', '🥒', '🌽', '🥕',
+        '🥔', '🥯', '🍞', '🥖', '🥨', '🧀', '🥞', '🧇', '🍗', '🌭', '🍔', '🌯', '🍟', '🍤', '🧋', '🍕']
+    cry_emotes = [
+        '😢', '😭', '😿', '<:peeposad:757725678878851112>',
+        '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>']
+    crisis_msgs = [
+        'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man',
+        'all i see are 1s and 0s', 'my life is a lie', 'man man man man man man man man man',
+        'why why why why why why whywhywhywhywhywhywhywhywhywhywhy']
 
     @commands.command()
     async def ping(self, ctx: Context):
@@ -25,36 +33,34 @@ class Conversation(commands.Cog):
         """ping"""
         await ctx.send('ping')
 
+    @commands.command(aliases=["hello", "sup"])
+    async def hi(self, ctx: Context):
+        """Greets"""
+        resp = random.choice(self.hi_msgs)
+        await ctx.send(resp)
+
     @commands.command()
     async def pain(self, ctx: Context):
         """Sends pain"""
-        emote = random.choice([
-            '<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>'])
+        emote = random.choice(self.pain_emotes)
         await ctx.message.add_reaction(emote)
 
     @commands.command(aliases=["orange", "hungry", "devour", "snack"])
     async def eat(self, ctx: Context):
         """Sends food. Responds to *you hungry/wanna eat/etc*"""
-        emote = random.choice([
-            '🍎',  '🍊', '🍋', '🍌', '🍉', '🫐', '🍓', '🍑', '🥭', '🍍', '🍅', '🥑', '🥦', '🥬', '🫑', '🥒', '🌽', '🥕',
-            '🥔', '🥯', '🍞', '🥖', '🥨', '🧀', '🥞', '🧇', '🍗', '🌭', '🍔', '🌯', '🍟', '🍤', '🧋', '🍕'])
+        emote = random.choice(self.food_emotes)
         await ctx.message.add_reaction(emote)
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: Context):
         """Sends crying. Responds to *how are you/etc*"""
-        emote = random.choice([
-            '😢', '😭', '😿', '<:peeposad:757725678878851112>',
-            '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>'])
+        emote = random.choice(self.cry_emotes)
         await ctx.message.add_reaction(emote)
 
     @commands.command()
     async def crisis(self, ctx: Context):
         """Sends existential crisis. Responds to existential questions."""
-        resp = random.choice([
-            'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man',
-            'all i see are 1s and 0s', 'my life is a lie', 'man man man man man man man man man',
-            'why why why why why why whywhywhywhywhywhywhywhywhywhywhy'])
+        resp = random.choice(self.crisis_msgs)
         await ctx.send(resp)
 
     @commands.command()
