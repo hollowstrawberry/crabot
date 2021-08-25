@@ -5,6 +5,8 @@ import textwrap
 from contextlib import redirect_stdout
 from discord.ext import commands
 from discord.ext.commands import Context
+import discord, re, json, hashlib, random  # for eval
+
 
 class Dev(commands.Cog):
     def __init__(self, bot: commands.Bot):

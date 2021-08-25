@@ -15,12 +15,12 @@ class Fun(commands.Cog):
         "<:bluedonut:879880267391705089>", "<:plaindonut:879880268431892560>",
         "<:greendonut:879880268482232331>", "<:chocchocdonut:879880268658380840>",
         "<:pinkdonut:879880268704538634>", "<:pinkdonut2:879880268704546826>",
-        "<:whitedonut:879880268759064586>", "<:whitedonut2:879882533553184848>",
-        "<:chocdonut:879880269140725800>", "<:chocdonut2:879880269170102312>",
+        "<:plaindonutfull:879892288870961262>", "<:whitedonut:879882533553184848>",
+        "<:chocdonut:879880269140725800>", "<:chocdonutfull:879892288111783966>",
         "<:whitepinkdonut:879880269434339398>", "<:yellowdonut:879882288270303282>",
-        "<:whiteplaindonut:879880269560152106>", "<:chocplaindonut:879880269560152124>",
+        "<:pinkdonutfull:879892287839154268>", "<:chocplaindonut:879880269560152124>",
         "<:whitechocdonut:879880269857976371>", "<:pinkplaindonut:879880269937647616>",
-        "<:plaindonutchips:879880270055079969>", "<:reddonut:879880270105444413>",
+        "<:whitewhitedonut:879892288241815663>", "<:reddonut:879880270105444413>",
         "<:pinkpinkdonut:879880270168330260>", "<:pinkchocdonut:879880271829299220>"]
 
     def __init__(self, bot):
@@ -89,7 +89,7 @@ class Fun(commands.Cog):
     @commands.command()
     @commands.cooldown(rate=5, per=5, type=commands.BucketType.channel)
     async def donut(self, ctx: Context):
-        """Gives you a random donut"""
+        """Gives you donuts"""
         try:
             with open(self.DONUT_FILE, 'r') as file:
                 data = json.load(file)
@@ -100,7 +100,7 @@ class Fun(commands.Cog):
         data[str(ctx.author.id)] = count
         with open(self.DONUT_FILE, 'w') as file:
             json.dump(data, file)
-        hash = abs(int(hashlib.sha256(bytes(count)).hexdigest(), 16))
+        hash = abs(int(hashlib.sha256(bytes(count)).hexdigest(), 16)) + 11
         donut = self.donuts[hash % len(self.donuts)]
         await ctx.send(f'{count} {donut}')
         print(f'User {ctx.author.id} now has {count} donuts')
