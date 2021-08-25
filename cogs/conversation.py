@@ -18,6 +18,7 @@ class Conversation(commands.Cog):
     cry_emotes = [
         '😢', '😭', '😿', '<:peeposad:757725678878851112>',
         '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>']
+    blush_emotes = ["😳", "<:bigflush:756867044846075955>", "<:viviflushed:757564758529540206>"]
     crisis_msgs = [
         'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man',
         'all i see are 1s and 0s', 'my life is a lie', 'man man man man man man man man man',
@@ -59,13 +60,14 @@ class Conversation(commands.Cog):
 
     @commands.command()
     async def crisis(self, ctx: Context):
-        """Sends existential crisis. Responds to existential questions."""
+        """Sends existential crisis. Responds to existential questions"""
         resp = random.choice(self.crisis_msgs)
         await ctx.send(resp)
 
-    @commands.command(aliases=["horni", "flush", "flushed"], hidden=True)
-    async def horny(self, ctx: Context):
-        emote = random.choice(["😳", "<:bigflush:756867044846075955>", "<:viviflushed:757564758529540206>"])
+    @commands.command(aliases=["horny", "horni", "flush", "flushed"], hidden=True)
+    async def blush(self, ctx: Context):
+        """Sends blush. Responds to compliments"""
+        emote = random.choice(self.blush_emotes)
         await ctx.message.add_reaction(emote)
 
     @commands.command()
@@ -98,6 +100,10 @@ class Conversation(commands.Cog):
         if re.match(r"(how a?re? y?o?u|a?re? y?o?u (sad|fine|happy|okay|depressed)"
                     r"|shut|shut up|stfu|shut the fuck up|silence|shut your mouth|stop talking) ?\??", content):
             return await self.cry(ctx)
+
+        if re.match(r"(y?o?u'? ?a?re? (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*)", content):
+            return await self.blush(ctx)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Conversation(bot))
