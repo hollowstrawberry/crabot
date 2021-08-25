@@ -98,7 +98,8 @@ class Conversation(commands.Cog):
             return await self.about(ctx)
 
         if re.match(r"(how a?re? y?o?u|a?re? y?o?u (sad|fine|happy|okay|depressed)"
-                    r"|shut|shut up|stfu|shut the fuck up|silence|shut your mouth|stop talking) ?\??", content):
+                    r"|shut|shut up|stfu|shut the fuck up|silence|shut your mouth|stop talking"
+                    r"|fuck y?o?u|i hate y?o?u|i h8 y?o?u|fuck off) ?\??", content):
             return await self.cry(ctx)
 
         if re.match(r"(y?o?u'? ?a?re? (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*)", content):

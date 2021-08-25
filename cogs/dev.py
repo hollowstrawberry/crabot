@@ -96,6 +96,8 @@ class Dev(commands.Cog):
     async def on_command_error(self, ctx: Context, error: commands.CommandError):
         if isinstance(error, commands.NotOwner):
             await ctx.message.add_reaction('❌')
+        else:
+            print(error)
 
 
 def setup(bot: commands.Bot):
