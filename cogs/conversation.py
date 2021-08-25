@@ -45,18 +45,27 @@ class Conversation(commands.Cog):
         """Sends pain"""
         emote = random.choice(self.pain_emotes)
         await ctx.message.add_reaction(emote)
+        if ctx.message.reference:
+            ref = await ctx.fetch_message(ctx.message.reference.message_id)
+            await ref.add_reaction(emote)
 
     @commands.command(aliases=["orange", "hungry", "devour", "snack"])
     async def eat(self, ctx: Context):
         """Sends food. Responds to *you hungry/wanna eat/etc*"""
         emote = random.choice(self.food_emotes)
         await ctx.message.add_reaction(emote)
+        if ctx.message.reference:
+            ref = await ctx.fetch_message(ctx.message.reference.message_id)
+            await ref.add_reaction(emote)
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: Context):
         """Sends crying. Responds to *how are you/you suck/etc*"""
         emote = random.choice(self.cry_emotes)
         await ctx.message.add_reaction(emote)
+        if ctx.message.reference:
+            ref = await ctx.fetch_message(ctx.message.reference.message_id)
+            await ref.add_reaction(emote)
 
     @commands.command()
     async def crisis(self, ctx: Context):
@@ -69,6 +78,9 @@ class Conversation(commands.Cog):
         """Sends blush. Responds to compliments"""
         emote = random.choice(self.blush_emotes)
         await ctx.message.add_reaction(emote)
+        if ctx.message.reference:
+            ref = await ctx.fetch_message(ctx.message.reference.message_id)
+            await ref.add_reaction(emote)
 
     @commands.command()
     async def about(self, ctx: Context):
