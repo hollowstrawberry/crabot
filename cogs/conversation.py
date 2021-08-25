@@ -54,7 +54,7 @@ class Conversation(commands.Cog):
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: Context):
-        """Sends crying. Responds to *how are you/etc*"""
+        """Sends crying. Responds to *how are you/you suck/etc*"""
         emote = random.choice(self.cry_emotes)
         await ctx.message.add_reaction(emote)
 
@@ -99,7 +99,7 @@ class Conversation(commands.Cog):
 
         if re.match(r"(how a?re? y?o?u|a?re? y?o?u (sad|fine|happy|okay|depressed)"
                     r"|shut|shut up|stfu|shut the fuck up|silence|shut your mouth|stop talking"
-                    r"|fuck y?o?u|i hate y?o?u|i h8 y?o?u|fuck off) ?\??", content):
+                    r"|fuck y?o?u|i hate y?o?u|i h8 y?o?u|fuck off|y?o?u suck) ?\??", content):
             return await self.cry(ctx)
 
         if re.match(r"(y?o?u'? ?a?re? (pretty|cute|nice|cool|awesome|good|a good.*)|draw me.*)", content):
