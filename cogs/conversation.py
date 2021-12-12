@@ -49,7 +49,7 @@ class Conversation(commands.Cog):
             ref = await ctx.fetch_message(ctx.message.reference.message_id)
             await ref.add_reaction(emote)
 
-    @commands.command(aliases=["orange", "hungry", "devour", "snack"])
+    @commands.command(aliases=["hungry", "devour", "snack"])
     async def eat(self, ctx: Context):
         """Sends food. Also works with *you hungry/wanna eat/etc*"""
         emote = random.choice(self.food_emotes)
@@ -85,7 +85,7 @@ class Conversation(commands.Cog):
     @commands.command()
     async def about(self, ctx: Context):
         """Describe myself. Responds to *who are you/tell me about you/etc*"""
-        await ctx.send("I'm Grey, a bot made for fun in homage to my friend Human Grey. "
+        await ctx.send("I'm Smoke, a bot made for fun in homage to my friend Sam. "
                        "My owner is <@871733390251012147>")
 
     @commands.Cog.listener()
