@@ -81,7 +81,7 @@ class Conversation(commands.Cog):
 
     @commands.command(aliases=["strong", "excercise"])
     async def workout(self, ctx: Context):
-        """Reacts to something. Also works if you tell compliments"""
+        """Reacts to something"""
         emote = random.choice(self.workout_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
@@ -128,7 +128,7 @@ class Conversation(commands.Cog):
             return await self.cry(ctx)
 
         if re.match(r"((y?o?u'? ?a?re?|'?i?s) (so|such a)? ?(pretty|cute|nice|cool|awesome|good|talented|a good.*)"
-                    r"|you rock)", content):
+                    r"|you rock|(i|we) (like|love) y?o?u)", content):
             return await self.blush(ctx)
 
 
