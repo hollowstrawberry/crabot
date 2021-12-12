@@ -4,7 +4,7 @@ import json
 import os
 from discord.ext import commands
 
-prefix = 'grey'
+prefix = 'smoke'
 def get_prefix(bot: commands.Bot, message):
     m = re.match(fr'^({prefix}|<@!?{bot.user.id}>) ?,? ?', message.content, re.IGNORECASE)
     return m.group() if m else prefix
