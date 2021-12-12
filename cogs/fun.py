@@ -43,9 +43,9 @@ class Fun(commands.Cog):
             ) as res:
                 text = await res.text()
                 if text == "No short answer available":
-                    to_send = "thats too much for my tiny brain"
+                    to_send = "<a:vibebones:756859685281202186>"
                 elif text == "Wolfram|Alpha did not understand your input":
-                    to_send = "nani"
+                    to_send = "I have no idea what you're asking but the answer is yes"
                 else:
                     to_send = text
                 await ctx.send(to_send)
