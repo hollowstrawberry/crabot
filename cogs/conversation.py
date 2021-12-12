@@ -132,7 +132,7 @@ class Conversation(commands.Cog):
             return await self.blush(ctx)
 
         if re.match(r"(workout|work out|excercise|strong)", content):
-            return await self.blush(ctx)
+            return await self.workout(ctx)
 
 
 def setup(bot: commands.Bot):
