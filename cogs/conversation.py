@@ -131,7 +131,7 @@ class Conversation(commands.Cog):
                     r"|you rock|(i|we) (like|love) y?o?u)", content):
             return await self.blush(ctx)
 
-        if re.match(r"(workout|work out|excercise|strong)", content):
+        if re.match(r"(work out)", content):
             return await self.workout(ctx)
 
 
