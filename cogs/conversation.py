@@ -131,6 +131,9 @@ class Conversation(commands.Cog):
                     r"|you rock|(i|we) (like|love) y?o?u)", content):
             return await self.blush(ctx)
 
+        if re.match(r"(workout|work out|excercise|strong)", content):
+            return await self.blush(ctx)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Conversation(bot))
