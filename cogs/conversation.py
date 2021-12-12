@@ -9,7 +9,8 @@ class Conversation(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    hi_msgs = ['hi!', 'hello', 'hey']
+    hi_msgs = [
+        'hi!', 'hello', 'hey']
     pain_emotes = [
         '<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>']
     food_emotes = [
@@ -17,7 +18,10 @@ class Conversation(commands.Cog):
     cry_emotes = [
         '😢', '😭', '😿', '<:peeposad:757725678878851112>',
         '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>']
-    blush_emotes = ["😳", "<:bigflush:756867044846075955>", "<:viviflushed:757564758529540206>"]
+    blush_emotes = [
+        '😳', '<:bigflush:756867044846075955>', '<:viviflushed:757564758529540206>']
+    workout_emotes = [
+        '🏋️‍♀️', '🦵', '💪']
     crisis_msgs = [
         'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man',
         'all i see are 1s and 0s', 'my life is a lie', 'man man man man man man man man man',
@@ -41,7 +45,7 @@ class Conversation(commands.Cog):
 
     @commands.command()
     async def pain(self, ctx: Context):
-        """Sends pain"""
+        """Reacts to something"""
         emote = random.choice(self.pain_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
@@ -50,7 +54,7 @@ class Conversation(commands.Cog):
 
     @commands.command(aliases=["hungry", "devour", "snack"])
     async def eat(self, ctx: Context):
-        """Sends food. Also works with *you hungry/wanna eat/etc*"""
+        """Reacts to something. Also works with *you hungry/wanna eat/etc*"""
         emote = random.choice(self.food_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
@@ -59,8 +63,26 @@ class Conversation(commands.Cog):
 
     @commands.command(aliases=["sad"])
     async def cry(self, ctx: Context):
-        """Sends crying. Also works with *how are you/you suck/etc*"""
+        """Reacts to something. Also works with *how are you/you suck/etc*"""
         emote = random.choice(self.cry_emotes)
+        await ctx.message.add_reaction(emote)
+        if ctx.message.reference:
+            ref = await ctx.fetch_message(ctx.message.reference.message_id)
+            await ref.add_reaction(emote)
+
+    @commands.command(aliases=["horny", "horni", "flush", "flushed", "cute", "nice", "awesome", "cool", "pretty"])
+    async def blush(self, ctx: Context):
+        """Reacts to something. Also works if you tell compliments"""
+        emote = random.choice(self.blush_emotes)
+        await ctx.message.add_reaction(emote)
+        if ctx.message.reference:
+            ref = await ctx.fetch_message(ctx.message.reference.message_id)
+            await ref.add_reaction(emote)
+
+    @commands.command(aliases=["strong", "excercise"])
+    async def workout(self, ctx: Context):
+        """Reacts to something. Also works if you tell compliments"""
+        emote = random.choice(self.workout_emotes)
         await ctx.message.add_reaction(emote)
         if ctx.message.reference:
             ref = await ctx.fetch_message(ctx.message.reference.message_id)
@@ -71,15 +93,6 @@ class Conversation(commands.Cog):
         """Sends existential crisis. Also works with existential questions"""
         resp = random.choice(self.crisis_msgs)
         await ctx.send(resp)
-
-    @commands.command(aliases=["horny", "horni", "flush", "flushed", "cute", "nice", "awesome", "cool", "pretty"])
-    async def blush(self, ctx: Context):
-        """Sends blush. Also works if you tell compliments"""
-        emote = random.choice(self.blush_emotes)
-        await ctx.message.add_reaction(emote)
-        if ctx.message.reference:
-            ref = await ctx.fetch_message(ctx.message.reference.message_id)
-            await ref.add_reaction(emote)
 
     @commands.command()
     async def about(self, ctx: Context):
