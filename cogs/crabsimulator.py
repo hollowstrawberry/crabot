@@ -8,21 +8,17 @@ from discord.ext import commands
 GUILD_ID = 756395872811483177
 CHANNEL_ID = 929193206472671262
 WEBHOOK_NAME = "CrabSimulator"
-MESSAGE_CHANCE = 10
-CONVERSATION_CHANCE = 30
+MESSAGE_CHANCE = 1/7
+CONVERSATION_CHANCE = 1/30
 CONVERSATION_DELAY = 60
 CONVERSATION_MIN = 3
 CONVERSATION_MAX = 20
-
-def one_in(chance: int) -> bool:
-    return random.randrange(0, chance) == 0
 
 class Crab:
     def __init__(self, user_id: int, phrases: List[str]):
         self.user_id = user_id
         self.phrases = phrases
         self.user: discord.User = None
-
 
 class Simulator(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -47,10 +43,14 @@ class Simulator(commands.Cog):
             await self.run()
 
     @commands.command()
-    async def trigger(self, ctx):
+    async def crabs(self, ctx: commands.Context):
         """Trigger a crab simulator conversation"""
-        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
-        await ctx.message.add_reaction('✅')
+        for crab in self.crabs:
+            if ctx.author.id == crab.user_id:
+                self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
+                await ctx.message.add_reaction('✅')
+                return
+        await ctx.message.add_reaction('❌')
 
     async def setup(self):
         self.guild = self.bot.get_guild(GUILD_ID)
@@ -80,7 +80,7 @@ class Simulator(commands.Cog):
         self.running = True
         while self.running:
             if self.conversation_left:
-                if one_in(MESSAGE_CHANCE):
+                if random.random() < MESSAGE_CHANCE:
                     try:
                         await self.send()
                         self.conversation_left -= 1
@@ -92,12 +92,12 @@ class Simulator(commands.Cog):
                             pass
                 await asyncio.sleep(1)
             else:
-                if one_in(CONVERSATION_CHANCE):
+                if random.random() < CONVERSATION_CHANCE:
                     self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
                 for i in range(CONVERSATION_DELAY):
-                    await asyncio.sleep(1)
                     if self.conversation_left or not self.running:
                         break
+                    await asyncio.sleep(1)
 
     async def send(self):
         crab = random.choice(self.crabs)
