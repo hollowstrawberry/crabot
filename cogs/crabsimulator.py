@@ -304,10 +304,10 @@ class Simulator(commands.Cog):
             previous = token
         result = "".join(result[:-1])
         # formatting
-        if result.count('(') > result.count(')'):
-            result += ')'
+        if result.count('(') != result.count(')'):
+            result = result.replace('(', '').replace(')', '')
         if result.count('"') % 2 == 1:
-            result += '"'
+            result = result.replace('"', '')
         return user_id, result
 
     @staticmethod
@@ -319,14 +319,14 @@ class Simulator(commands.Cog):
         return gram
 
     async def send_generated_message(self):
-        user_id, phrase = self.generate_message()
+        user_id, content = self.generate_message()
         user = self.guild.get_member(int(user_id))
         if user is None:
             return
         await self.webhook.send(username=user.display_name,
                                 avatar_url=user.avatar_url,
-                                content=phrase,
-                                allowed_mentions=None)
+                                content=content,
+                                allowed_mentions=discord.AllowedMentions.none())
 
 
 def setup(bot: commands.Bot):
