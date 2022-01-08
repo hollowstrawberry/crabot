@@ -21,7 +21,7 @@ CHAIN_SPLIT = "​"
 TOKENIZER = re.compile(r"(https?://\S+|<[@#&!:\w]+\d+>|[\w'-]+|\W+)")
 
 MESSAGE_CHANCE = 1/5
-CONVERSATION_CHANCE = 1/10
+CONVERSATION_CHANCE = 1/30
 CONVERSATION_DELAY = 60
 CONVERSATION_MIN = 4
 CONVERSATION_MAX = 15
@@ -60,7 +60,7 @@ class Simulator(commands.Cog):
         if self.role not in ctx.author.roles:
             await ctx.message.add_reaction(EMOJI_FAILURE)
             return
-        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
+        self.start_conversation()
         await ctx.message.add_reaction(EMOJI_SUCCESS)
 
     @simulator.command()
@@ -141,6 +141,13 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         """Processes new incoming messages"""
+        if message.channel == self.output_channel and not message.author.bot:
+            try:
+                await message.delete()
+            except:
+                pass
+            self.start_conversation()
+            return
         if message.guild != self.guild or message.channel != self.input_channel:
             return
         if self.role not in message.author.roles or message.author.bot:
@@ -223,11 +230,14 @@ class Simulator(commands.Cog):
                 await asyncio.sleep(1)
             else:
                 if random.random() < CONVERSATION_CHANCE:
-                    self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
+                    self.start_conversation()
                 for i in range(CONVERSATION_DELAY):
                     if self.conversation_left or not self.running:
                         break
                     await asyncio.sleep(1)
+
+    def start_conversation(self):
+        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
 
     def generate_text(self):
         """Generate text based on the model"""
