@@ -148,6 +148,7 @@ class Simulator(commands.Cog):
         await ctx.message.add_reaction(EMOJI_LOADING)
         self.running = False
         self.feeding = True
+        self.message_count = 0
         try:
             async with sql.connect(DB_FILE) as db:
                 await db.execute(f"DELETE FROM {DB_TABLE_MESSAGES}")
