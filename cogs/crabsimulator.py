@@ -15,7 +15,7 @@ WEBHOOK_NAME = "CrabSimulator"
 
 DB_FILE = "markov.sqlite"
 DB_TABLE_MESSAGES = "messages"
-COMMIT_SIZE = 100
+COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
 CHAIN_SPLIT = "​"
 TOKENIZER = re.compile(r"(https?://\S+|<[@#&!:\w]+\d+>|[\w'-]+|\W+)")
@@ -41,6 +41,7 @@ class Simulator(commands.Cog):
         self.webhook: Optional[discord.Webhook] = None
         self.conversation_left = 0
         self.model: dict = {}
+        self.message_count = 0
         if self.bot.is_ready():
             asyncio.create_task(self.on_ready())
 
@@ -49,8 +50,8 @@ class Simulator(commands.Cog):
 
     @commands.group()
     async def simulator(self, ctx: commands.Context):
-        """Simulates crab conversations"""
-        pass
+        """Commands for the crab conversation simulator"""
+        await ctx.send(f"Do `help simulator` for commands")
 
     @simulator.command()
     async def trigger(self, ctx: commands.Context):
@@ -78,6 +79,32 @@ class Simulator(commands.Cog):
             return
         self.running = False
         await ctx.message.add_reaction(EMOJI_SUCCESS)
+
+    @simulator.command()
+    async def stats(self, ctx: commands.Context):
+        """Information about the simulator"""
+        if self.role not in ctx.author.roles:
+            await ctx.message.add_reaction(EMOJI_FAILURE)
+            return
+        def count_nodes(tree: dict) -> int:
+            count = 0
+            for node in tree.values():
+                if isinstance(node, dict):
+                    count += count_nodes(node) + 1
+                else:
+                    count += 1
+            return count
+        def count_words(tree: dict) -> int:
+            count = 0
+            for node in tree.values():
+                if isinstance(node, dict):
+                    count += count_words(node)
+                elif isinstance(node, int):
+                    count += node
+            return count
+        await ctx.send(f"Messages: {self.message_count}\n"
+                       f"Nodes: {count_nodes(self.model)}\n"
+                       f"Words: {count_words(self.model)}")
 
     @simulator.command()
     @commands.is_owner()
@@ -140,6 +167,7 @@ class Simulator(commands.Cog):
             self.model.setdefault(previous, {})
             self.model[previous][token] = self.model[previous].get(token, 0) + 1
             previous = token
+        self.message_count += 1
         return True
 
     @staticmethod
@@ -171,10 +199,7 @@ class Simulator(commands.Cog):
                     async for row in cursor:
                         self.add_message(row[0], row[1])
                         count += 1
-            # confirm
             print(f"Model built with {count} messages")
-            confirm = await self.output_channel.send(f"Model built with {count} messages")
-            asyncio.create_task(self.delete_message(confirm, 5))
         except Exception as error:
             print(f'Failed to set up crab simulator: {error}')
             await self.output_channel.send(f'Failed to set up: {error}')
@@ -221,11 +246,6 @@ class Simulator(commands.Cog):
                                weights=list(model[previous].values()),
                                k=1)
         return gram
-
-    @staticmethod
-    async def delete_message(message: discord.Message, delay: int):
-        await asyncio.sleep(delay)
-        await message.delete()
 
     async def send(self):
         user_id, phrase = self.generate_text().split(CHAIN_SPLIT)
