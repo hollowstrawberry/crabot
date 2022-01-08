@@ -133,13 +133,14 @@ class Simulator(commands.Cog):
 
     @simulator.command()
     async def count(self, ctx: commands.Context, user: discord.Member, word):
-        """Count how many children nodes a word has for a specific user"""
+        """Count instances of a word for a specific user"""
         if user.id not in self.models:
             await ctx.send('User not found')
             return
-        await ctx.send(f"```css\n"
-                       f"#Children: {reduce(add, self.models[user.id].model.get(word, {}).values())}\n"
-                       f"#Unique: {len(self.models[user.id].model.get(word, {}))}\n```")
+        occurences = reduce(add, [x.get(word, 0) for x in self.models[user.id].model.values()])
+        children = len(self.models[user.id].model.get(word, {}))
+        childocc = reduce(add, self.models[user.id].model.get(word, {}).values())
+        await ctx.send(f"```css\n#Occurrences: {occurences}\n#Children: {children}\n#ChildOccurences: {childocc}\n```")
 
     @simulator.command()
     @commands.is_owner()
