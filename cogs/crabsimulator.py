@@ -20,9 +20,10 @@ DB_FILE = "markov.sqlite"
 DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
-TOKENIZER = re.compile(r"(https?://|(?<=http://)\S+|(?<=https://)\S+"    # URLs, separate start
-                       r"|<(@|#|@!|@&)\d{10,20}>|<a?:\w+:(?=\d)|(?<=\w:)\d{10,20}>"  # mentions, separate emoji start
-                       r"|[\w'-]+|\W+)")  # words and symbols
+TOKENIZER = re.compile(r"(https?://\S+|<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # URLs, mentions
+                       r"|[\w'-]+|\W+[^<])")  # words, symbols (exclude < to prevent breaking adjacent mentions)
+SUBTOKENIZER = re.compile(r"(https?://|(?<=http://)[^\s>]+|(?<=https://)[^\s>]+"  # separate URLs
+                          r"|<a?:(?=\w)|\w+:\d{10,20}>)")  # separate emojis
 
 MESSAGE_CHANCE = 1/5
 CONVERSATION_CHANCE = 1/30
@@ -217,6 +218,12 @@ class Simulator(commands.Cog):
         tokens = [m.group(1) for m in TOKENIZER.finditer(content)]
         if not tokens:
             return False
+        for i in range(len(tokens)):  # treat special objects as 2 separate tokens, for better chains
+            subtokens = SUBTOKENIZER.findall(tokens[i])
+            if ''.join(subtokens) == tokens[i]:
+                tokens.pop(i)
+                for j in range(len(subtokens)):
+                    tokens.insert(i+j, subtokens[j])
         tokens.append(CHAIN_END)
         previous = ""
         self.models.setdefault(int(user_id), UserModel(int(user_id), 0, {}))
