@@ -18,7 +18,7 @@ DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 100
 CHAIN_END = "🔚"
 CHAIN_SPLIT = "​"
-TOKENIZER = re.compile(r'(\w+|\W+)')
+TOKENIZER = re.compile(r'(\w+|\W+){1,2}')
 
 MESSAGE_CHANCE = 1/5
 CONVERSATION_CHANCE = 1/20
