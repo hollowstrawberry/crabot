@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import reduce
 
 import discord
@@ -33,6 +34,12 @@ EMOJI_LOADING = '<a:loading:410612084527595520>'
 EMOJI_SUCCESS = '✅'
 EMOJI_FAILURE = '❌'
 
+@dataclass
+class UserModel:
+    user_id: int
+    frequency: int
+    model: dict
+
 class Simulator(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -44,7 +51,7 @@ class Simulator(commands.Cog):
         self.role: Optional[discord.Role] = None
         self.webhook: Optional[discord.Webhook] = None
         self.conversation_left = 0
-        self.model: dict = {}
+        self.models: Dict[int, UserModel] = {}
         self.message_count = 0
         if self.bot.is_ready():
             asyncio.create_task(self.on_ready())
@@ -111,15 +118,18 @@ class Simulator(commands.Cog):
             return count
         await ctx.send(f"```css\n"
                        f"#Messages: {self.message_count}\n"
-                       f"#Nodes: {count_nodes(self.model)}\n"
-                       f"#Words: {count_words(self.model)}```")
+                       f"#Nodes: {count_nodes(self.models)}\n"
+                       f"#Words: {count_words(self.models)}```")
 
     @simulator.command()
     async def count(self, ctx: commands.Context, user: discord.Member, word):
         """Count how many children nodes a word has for a specific user"""
+        if user.id not in self.models:
+            await ctx.send('User not found')
+            return
         await ctx.send(f"```css\n"
-                       f"#Children: {reduce(lambda a, b: a+b, self.model.get(word, {}).values())}\n"
-                       f"#Unique: {len(self.model.get(word, {}))}\n```")
+                       f"#Children: {reduce(lambda a, b: a+b, self.models[user.id].model.get(word, {}).values())}\n"
+                       f"#Unique: {len(self.models[user.id].model.get(word, {}))}\n```")
 
     @simulator.command()
     @commands.is_owner()
@@ -181,10 +191,7 @@ class Simulator(commands.Cog):
     def start_conversation(self):
         self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
 
-    def add_message(self,
-                    user_id: Union[str, int],
-                    content: str,
-                    attachments: List[discord.Attachment] = None) -> bool:
+    def add_message(self, user_id: int, content: str, attachments: List[discord.Attachment] = None) -> bool:
         """Add a message to the model"""
         content = content.replace(CHAIN_SPLIT, '').replace(CHAIN_END, '') if content else ''
         if attachments and attachments[0].url:
@@ -197,10 +204,13 @@ class Simulator(commands.Cog):
         tokens.insert(0, f"{user_id}{CHAIN_SPLIT}")
         tokens.append(CHAIN_END)
         previous = ""
+        self.models.setdefault(int(user_id), UserModel(int(user_id), 0, {}))
+        user = self.models[int(user_id)]
+        user.frequency += 1
         for token in tokens:
             # Add token or increment its weight by 1
-            self.model.setdefault(previous, {})
-            self.model[previous][token] = self.model[previous].get(token, 0) + 1
+            user.model.setdefault(previous, {})
+            user.model[previous][token] = user.model[previous].get(token, 0) + 1
             previous = token
         self.message_count += 1
         return True
@@ -232,7 +242,7 @@ class Simulator(commands.Cog):
                                  f"(user_id TEXT NOT NULL, content TEXT NOT NULL);")
                 async with db.execute(f"SELECT * FROM {DB_TABLE_MESSAGES}") as cursor:
                     async for row in cursor:
-                        self.add_message(row[0], row[1])
+                        self.add_message(int(row[0]), row[1])
                         count += 1
             print(f"Model built with {count} messages")
         except Exception as error:
@@ -263,20 +273,23 @@ class Simulator(commands.Cog):
                         break
                     await asyncio.sleep(1)
 
-    def generate_message(self) -> str:
-        """Generate text based on the model"""
-        output = []
+    def generate_message(self) -> (int, str):
+        """Generate text based on the models"""
+        user_id, = random.choices(population=list(self.models.keys()),
+                                  weights=[x.frequency for x in self.models.values()],
+                                  k=1)
+        result = []
         token = ""
         previous = token
         while token != CHAIN_END:
-            token = self.generate_token(self.model, previous)
-            output.append(token)
+            token = self.generate_token(self.models[user_id].model, previous)
+            result.append(token)
             previous = token
-        result = "".join(output[:-1])
+        result = "".join(result[:-1])
         # formatting
         if result.count('(') > result.count(')'):
             result += ')'
-        return result
+        return user_id, result
 
     @staticmethod
     def generate_token(model: dict, previous: str) -> str:
@@ -287,7 +300,7 @@ class Simulator(commands.Cog):
         return gram
 
     async def send_generated_message(self):
-        user_id, phrase = self.generate_message().split(CHAIN_SPLIT)
+        user_id, phrase = self.generate_message()
         try:
             user = self.guild.get_member(int(user_id))
             if user is None: raise ValueError
