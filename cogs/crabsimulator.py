@@ -8,10 +8,9 @@ from discord.ext import commands
 GUILD_ID = 756395872811483177
 CHANNEL_ID = 929193206472671262
 WEBHOOK_NAME = "CrabSimulator"
-MESSAGE_DELAY = 1
-MESSAGE_CHANCE = 10
-CONVERSATION_DELAY = 60
+MESSAGE_CHANCE = 5
 CONVERSATION_CHANCE = 30
+CONVERSATION_DELAY = 60
 CONVERSATION_MIN = 3
 CONVERSATION_MAX = 20
 
@@ -91,11 +90,14 @@ class Simulator(commands.Cog):
                             await self.channel.send(f'Error: {error}')
                         except:
                             pass
-                await asyncio.sleep(MESSAGE_DELAY)
+                await asyncio.sleep(1)
             else:
                 if one_in(CONVERSATION_CHANCE):
                     self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
-                await asyncio.sleep(CONVERSATION_DELAY)
+                for i in range(CONVERSATION_DELAY):
+                    await asyncio.sleep(1)
+                    if self.conversation_left or not self.running:
+                        break
 
     async def send(self):
         crab = random.choice(self.crabs)
