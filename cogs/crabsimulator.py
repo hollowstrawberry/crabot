@@ -149,6 +149,9 @@ class Simulator(commands.Cog):
         self.running = False
         self.feeding = True
         self.message_count = 0
+        for user in self.models.values():
+            user.model = {}
+            user.frequency = 0
         try:
             async with sql.connect(DB_FILE) as db:
                 await db.execute(f"DELETE FROM {DB_TABLE_MESSAGES}")
