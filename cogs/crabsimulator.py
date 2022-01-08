@@ -139,7 +139,7 @@ class Simulator(commands.Cog):
             return
         occurences = reduce(add, [x.get(word, 0) for x in self.models[user.id].model.values()])
         children = len(self.models[user.id].model.get(word, {}))
-        await ctx.send(f"```yaml\nOccurrences: {occurences}\nWords that follow: {children}")
+        await ctx.send(f"```yaml\nOccurrences: {occurences}\nWords that follow: {children}```")
 
     @simulator.command()
     @commands.is_owner()
