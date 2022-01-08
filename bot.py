@@ -9,7 +9,7 @@ def get_prefix(bot: commands.Bot, message):
     m = re.match(fr'^({prefix}|<@!?{bot.user.id}>) ?,? ?', message.content, re.IGNORECASE)
     return m.group() if m else prefix
 
-intents = discord.Intents(members=True, guilds=True, typing=False, presences=False)
+intents = discord.Intents(members=True, guilds=True, guild_messages=True)
 bot = commands.Bot(command_prefix=get_prefix, activity=discord.Game('Minecraft'), intents=intents)
 
 with open('token.json') as f:
