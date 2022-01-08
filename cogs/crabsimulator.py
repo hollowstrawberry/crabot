@@ -24,11 +24,8 @@ class Simulator(commands.Cog):
         self.webhook: discord.Webhook = None
         self.crabs: List[Crab] = []
         self.last_phrase: str = ""
-
-    @commands.command()
-    @commands.is_owner()
-    async def startsimulator(self, ctx):
-        await self.on_ready()
+        if self.bot.is_ready():
+            asyncio.create_task(self.on_ready())
 
     def cog_unload(self):
         self.running = False
