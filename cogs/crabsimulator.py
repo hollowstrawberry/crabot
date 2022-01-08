@@ -18,7 +18,8 @@ DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
 CHAIN_SPLIT = "​"
-TOKENIZER = re.compile(r"(https?://\S+|<[@#&!:\w]+\d+>|[\w'-]+|\W+)")
+TOKENIZER = re.compile(r"(https?://|(?<=http://)\S+|(?<=https://)\S+|<[@#&!:\w]+\d+>|[\w'-]+|\W+)")
+#                        (match URLs but separate the start)        (mentions)      (words)(symbols)
 
 MESSAGE_CHANCE = 1/5
 CONVERSATION_CHANCE = 1/30
