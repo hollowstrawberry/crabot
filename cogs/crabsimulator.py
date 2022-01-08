@@ -119,7 +119,9 @@ class Simulator(commands.Cog):
                 await db.commit()
                 start_date = datetime.now() - timedelta(days=days)
                 async for message in self.input_channel.history(after=start_date, limit=None):
-                    if self.add_message(message.author.id, message.content):
+                    if message.author.bot:
+                        continue
+                    if self.add_message(message.author.id, message.content, message.attachments):
                         await self.insert_message_db(message, db)
                         count += 1
                         if count % COMMIT_SIZE == 0:
@@ -135,8 +137,8 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         if not self.running:
-            await self.setup()
-            await self.run()
+            await self.setup_simulator()
+            await self.run_simulator()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -150,19 +152,25 @@ class Simulator(commands.Cog):
             return
         if message.guild != self.guild or message.channel != self.input_channel:
             return
-        if self.role not in message.author.roles or message.author.bot:
+        if message.author.bot or self.role not in message.author.roles:
             return
-        if self.add_message(message.author.id, message.content):
+        if self.add_message(message.author.id, message.content, message.attachments):
             async with sql.connect(DB_FILE) as db:
                 await self.insert_message_db(message, db)
                 await db.commit()
 
-    def add_message(self, user_id: Union[str, int], content: str) -> bool:
+    def start_conversation(self):
+        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
+
+    def add_message(self,
+                    user_id: Union[str, int],
+                    content: str,
+                    attachments: List[discord.Attachment] = None) -> bool:
         """Add a message to the model"""
-        if content is None:
-            return False
-        content = content.replace(CHAIN_SPLIT, '').replace(CHAIN_END, '')
-        if len(content) < 1:
+        content = content.replace(CHAIN_SPLIT, '').replace(CHAIN_END, '') if content else ''
+        if attachments and attachments[0].url:
+            content += (' ' if content else '') + attachments[0].url
+        if not content:
             return False
         tokens = [m.group(1) for m in TOKENIZER.finditer(content)]
         if not tokens:
@@ -183,7 +191,7 @@ class Simulator(commands.Cog):
         await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
                          [str(message.author.id), message.content])
 
-    async def setup(self):
+    async def setup_simulator(self):
         """Set up the simulator"""
         try:
             # discord entities
@@ -212,7 +220,7 @@ class Simulator(commands.Cog):
             print(f'Failed to set up crab simulator: {error}')
             await self.output_channel.send(f'Failed to set up: {error}')
 
-    async def run(self):
+    async def run_simulator(self):
         """Run the simulator"""
         self.running = True
         while self.running:
@@ -220,7 +228,7 @@ class Simulator(commands.Cog):
                 if random.random() < MESSAGE_CHANCE:
                     try:
                         self.conversation_left -= 1
-                        await self.send()
+                        await self.send_generated_message()
                     except Exception as error:
                         print(f'{type(error).__name__}: {error}')
                         try:
@@ -236,36 +244,36 @@ class Simulator(commands.Cog):
                         break
                     await asyncio.sleep(1)
 
-    def start_conversation(self):
-        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
-
-    def generate_text(self):
+    def generate_message(self):
         """Generate text based on the model"""
         output = []
-        gram = ""
-        previous = gram
-        while gram != CHAIN_END:
-            gram = self.choose_gram(self.model, previous)
-            output.append(gram)
-            previous = gram
-        return "".join(output[:-1])
+        token = ""
+        previous = token
+        while token != CHAIN_END:
+            token = self.generate_token(self.model, previous)
+            output.append(token)
+            previous = token
+        result = "".join(output[:-1])
+        # formatting
+        if result.count('(') > result.count(')'):
+            result += ')'
+        return
 
     @staticmethod
-    def choose_gram(model: dict, previous: str):
+    def generate_token(model: dict, previous: str):
         """Where the magic happens"""
         gram, = random.choices(population=list(model[previous].keys()),
                                weights=list(model[previous].values()),
                                k=1)
         return gram
 
-    async def send(self):
-        user_id, phrase = self.generate_text().split(CHAIN_SPLIT)
+    async def send_generated_message(self):
+        user_id, phrase = self.generate_message().split(CHAIN_SPLIT)
         try:
             user = self.guild.get_member(int(user_id))
+            if user is None: raise ValueError
         except ValueError:
-            raise ValueError(f"Invalid id {user_id} in markov chain")
-        if user is None:
-            raise KeyError("Can't find user for simulator")
+            raise ValueError(f"Can't find user")
         await self.webhook.send(username=user.display_name,
                                 avatar_url=user.avatar_url,
                                 content=phrase,
