@@ -124,7 +124,7 @@ class Simulator(commands.Cog):
                 return
             messages = self.models[user.id].frequency
             nodes = count_nodes(self.models[user.id].model)
-            words = count_words(self.models)
+            words = count_words(self.models[user.id].model)
         else:
             messages = self.message_count
             nodes = reduce(add, [count_nodes(x.model) for x in self.models.values()])
