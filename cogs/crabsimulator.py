@@ -51,7 +51,8 @@ class Simulator(commands.Cog):
     @commands.group()
     async def simulator(self, ctx: commands.Context):
         """Commands for the crab conversation simulator"""
-        await ctx.send(f"Do `help simulator` for commands")
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f"Do `help simulator` for commands")
 
     @simulator.command()
     async def trigger(self, ctx: commands.Context):
