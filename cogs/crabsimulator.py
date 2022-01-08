@@ -219,7 +219,7 @@ class Simulator(commands.Cog):
         if not tokens:
             return False
         for i in range(len(tokens)):  # treat special objects as 2 separate tokens, for better chains
-            subtokens = SUBTOKENIZER.findall(tokens[i])
+            subtokens = [m.group(0) for m in SUBTOKENIZER.finditer(tokens[i])]
             if ''.join(subtokens) == tokens[i]:
                 tokens.pop(i)
                 for j in range(len(subtokens)):
