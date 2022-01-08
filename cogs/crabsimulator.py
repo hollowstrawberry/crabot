@@ -1,3 +1,5 @@
+from functools import reduce
+
 import discord
 import asyncio
 import random
@@ -111,6 +113,13 @@ class Simulator(commands.Cog):
                        f"#Messages: {self.message_count}\n"
                        f"#Nodes: {count_nodes(self.model)}\n"
                        f"#Words: {count_words(self.model)}```")
+
+    @simulator.command()
+    async def count(self, ctx: commands.Context, user: discord.Member, word):
+        """Count how many children nodes a word has for a specific user"""
+        await ctx.send(f"```css\n"
+                       f"#Children: {reduce(lambda a, b: a+b, self.model.get(word, {}).values())}\n"
+                       f"#Unique: {len(self.model.get(word, {}))}\n```")
 
     @simulator.command()
     @commands.is_owner()
