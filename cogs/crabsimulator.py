@@ -18,7 +18,7 @@ DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 100
 CHAIN_END = "🔚"
 CHAIN_SPLIT = "​"
-TOKENIZER = re.compile(r'(https?://\S+|<.+\d+>|\w+|\W+)')
+TOKENIZER = re.compile(r"(https?://\S+|<.+\d+>|[\w'-]+|\W+)")
 
 MESSAGE_CHANCE = 1/5
 CONVERSATION_CHANCE = 1/10
@@ -108,7 +108,6 @@ class Simulator(commands.Cog):
     async def on_ready(self):
         if not self.running:
             await self.setup()
-            print(self.model)
             await self.run()
 
     @commands.Cog.listener()
@@ -164,12 +163,18 @@ class Simulator(commands.Cog):
             webhooks = [w for w in webhooks if w.user == self.bot.user and w.name == WEBHOOK_NAME]
             self.webhook = webhooks[0] if webhooks else await self.output_channel.create_webhook(name=WEBHOOK_NAME)
             # database
+            count = 0
             async with sql.connect(DB_FILE) as db:
                 await db.execute(f"CREATE TABLE IF NOT EXISTS {DB_TABLE_MESSAGES} "
                                  f"(user_id TEXT NOT NULL, content TEXT NOT NULL);")
                 async with db.execute(f"SELECT * FROM {DB_TABLE_MESSAGES}") as cursor:
                     async for row in cursor:
                         self.add_message(row[0], row[1])
+                        count += 1
+            # confirm
+            print(f"Model built with {count} messages")
+            confirm = await self.output_channel.send(f"Model built with {count} messages")
+            asyncio.create_task(self.delete_message(confirm, 5))
         except Exception as error:
             print(f'Failed to set up crab simulator: {error}')
             await self.output_channel.send(f'Failed to set up: {error}')
@@ -216,6 +221,11 @@ class Simulator(commands.Cog):
                                weights=list(model[previous].values()),
                                k=1)
         return gram
+
+    @staticmethod
+    async def delete_message(message: discord.Message, delay: int):
+        await asyncio.sleep(delay)
+        await message.delete()
 
     async def send(self):
         user_id, phrase = self.generate_text().split(CHAIN_SPLIT)
