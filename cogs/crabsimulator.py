@@ -18,20 +18,26 @@ class Simulator(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.running  = True
+        self.running = False
         self.guild: discord.Guild = None
         self.channel: discord.TextChannel = None
         self.webhook: discord.Webhook = None
         self.crabs: List[Crab] = []
         self.last_phrase: str = ""
 
+    @commands.command()
+    @commands.is_owner()
+    async def startsimulator(self, ctx):
+        await self.on_ready()
+
     def cog_unload(self):
         self.running = False
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await self.setup()
-        await self.run()
+        if not self.running:
+            await self.setup()
+            await self.run()
 
     async def setup(self):
         self.guild = self.bot.get_guild(self.GUILD_ID)
@@ -59,6 +65,7 @@ class Simulator(commands.Cog):
             await self.channel.send(f'Failed to set up: {error}')
 
     async def run(self):
+        self.running = True
         while self.running:
             await asyncio.sleep(1)
             if random.randint(0, 10) == 0:
