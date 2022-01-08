@@ -34,6 +34,7 @@ class Simulator(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.running = False
+        self.feeding = False
         self.guild: Optional[discord.Guild] = None
         self.input_channel: Optional[discord.TextChannel] = None
         self.output_channel: Optional[discord.TextChannel] = None
@@ -47,6 +48,7 @@ class Simulator(commands.Cog):
 
     def cog_unload(self):
         self.running = False
+        self.feeding = False
 
     @commands.group()
     async def simulator(self, ctx: commands.Context):
@@ -69,7 +71,8 @@ class Simulator(commands.Cog):
         if self.role not in ctx.author.roles:
             await ctx.message.add_reaction(EMOJI_FAILURE)
             return
-        self.running = True
+        if not self.running and not self.feeding:
+            asyncio.create_task(self.run_simulator())
         await ctx.message.add_reaction(EMOJI_SUCCESS)
 
     @simulator.command()
@@ -103,34 +106,40 @@ class Simulator(commands.Cog):
                 elif isinstance(node, int):
                     count += node
             return count
-        await ctx.send(f"Messages: {self.message_count}\n"
-                       f"Nodes: {count_nodes(self.model)}\n"
-                       f"Words: {count_words(self.model)}")
+        await ctx.send(f"```css\n"
+                       f"#Messages: {self.message_count}\n"
+                       f"#Nodes: {count_nodes(self.model)}\n"
+                       f"#Words: {count_words(self.model)}```")
 
     @simulator.command()
     @commands.is_owner()
     async def feed(self, ctx: commands.Context, days: int):
         """Feed past messages into the simulator"""
         await ctx.message.add_reaction(EMOJI_LOADING)
-        count = 0
+        self.running = False
+        self.feeding = True
         try:
             async with sql.connect(DB_FILE) as db:
                 await db.execute(f"DELETE FROM {DB_TABLE_MESSAGES}")
                 await db.commit()
                 start_date = datetime.now() - timedelta(days=days)
                 async for message in self.input_channel.history(after=start_date, limit=None):
+                    if not self.feeding:
+                        break
                     if message.author.bot:
                         continue
                     if self.add_message(message.author.id, message.content, message.attachments):
                         await self.insert_message_db(message, db)
-                        count += 1
-                        if count % COMMIT_SIZE == 0:
+                        if self.message_count % COMMIT_SIZE == 0:
                             await db.commit()
                 await db.commit()
         except Exception as error:
             await ctx.send(f"{type(error).__name__}: {error}\n"
-                           f"Loaded {count} messages, {count // COMMIT_SIZE * COMMIT_SIZE} to database")
-        await ctx.send(f"Loaded {count} messages")
+                           f"Loaded {self.message_count} messages, "
+                           f"{self.message_count // COMMIT_SIZE * COMMIT_SIZE} to database")
+        self.feeding = False
+        asyncio.create_task(self.run_simulator())
+        await ctx.send(f"Loaded {self.message_count} messages")
         await ctx.message.remove_reaction(EMOJI_LOADING, self.bot.user)
         await ctx.message.add_reaction(EMOJI_SUCCESS)
 
@@ -244,7 +253,7 @@ class Simulator(commands.Cog):
                         break
                     await asyncio.sleep(1)
 
-    def generate_message(self):
+    def generate_message(self) -> str:
         """Generate text based on the model"""
         output = []
         token = ""
@@ -257,10 +266,10 @@ class Simulator(commands.Cog):
         # formatting
         if result.count('(') > result.count(')'):
             result += ')'
-        return
+        return result
 
     @staticmethod
-    def generate_token(model: dict, previous: str):
+    def generate_token(model: dict, previous: str) -> str:
         """Where the magic happens"""
         gram, = random.choices(population=list(model[previous].keys()),
                                weights=list(model[previous].values()),
