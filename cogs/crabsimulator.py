@@ -1,12 +1,12 @@
-from dataclasses import dataclass
-from functools import reduce
-
 import discord
 import asyncio
 import random
 import re
 import aiosqlite as sql
 from typing import *
+from dataclasses import dataclass
+from functools import reduce
+from operator import add
 from datetime import datetime, timedelta
 from discord.ext import commands
 
@@ -94,11 +94,12 @@ class Simulator(commands.Cog):
         await ctx.message.add_reaction(EMOJI_SUCCESS)
 
     @simulator.command()
-    async def stats(self, ctx: commands.Context):
-        """Information about the simulator"""
+    async def stats(self, ctx: commands.Context, user: Optional[discord.Member]):
+        """Statistics about the simulator, globally or for a user"""
         if self.role not in ctx.author.roles:
             await ctx.message.add_reaction(EMOJI_FAILURE)
             return
+
         def count_nodes(tree: dict) -> int:
             count = 0
             for node in tree.values():
@@ -107,6 +108,7 @@ class Simulator(commands.Cog):
                 else:
                     count += 1
             return count
+
         def count_words(tree: dict) -> int:
             count = 0
             for node in tree.values():
@@ -115,10 +117,19 @@ class Simulator(commands.Cog):
                 elif isinstance(node, int):
                     count += node
             return count
-        await ctx.send(f"```css\n"
-                       f"#Messages: {self.message_count}\n"
-                       f"#Nodes: {count_nodes(self.models)}\n"
-                       f"#Words: {count_words(self.models)}```")
+
+        if user:
+            if user.id not in self.models:
+                await ctx.send("User not found")
+                return
+            messages = self.models[user.id].frequency
+            nodes = count_nodes(self.models[user.id].model)
+            words = count_words(self.models)
+        else:
+            messages = self.message_count
+            nodes = reduce(add, [count_nodes(x.model) for x in self.models.values()])
+            words = reduce(add, [count_words(x.model) for x in self.models.values()])
+        await ctx.send(f"```css\n#Messages: {messages}\n#Nodes: {nodes}\n#Words: {words}```")
 
     @simulator.command()
     async def count(self, ctx: commands.Context, user: discord.Member, word):
@@ -127,7 +138,7 @@ class Simulator(commands.Cog):
             await ctx.send('User not found')
             return
         await ctx.send(f"```css\n"
-                       f"#Children: {reduce(lambda a, b: a+b, self.models[user.id].model.get(word, {}).values())}\n"
+                       f"#Children: {reduce(add, self.models[user.id].model.get(word, {}).values())}\n"
                        f"#Unique: {len(self.models[user.id].model.get(word, {}))}\n```")
 
     @simulator.command()
