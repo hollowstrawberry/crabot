@@ -298,6 +298,8 @@ class Simulator(commands.Cog):
         # formatting
         if result.count('(') > result.count(')'):
             result += ')'
+        if result.count('"') % 2 == 1:
+            result += '"'
         return user_id, result
 
     @staticmethod
