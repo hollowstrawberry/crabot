@@ -20,7 +20,6 @@ DB_FILE = "markov.sqlite"
 DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
-CHAIN_SPLIT = "​"
 TOKENIZER = re.compile(r"(https?://|(?<=http://)\S+|(?<=https://)\S+|<[@#&!:\w]+\d+>|[\w'-]+|\W+)")
 #                        (match URLs but separate the start)        (mentions)      (words)(symbols)
 
@@ -193,7 +192,7 @@ class Simulator(commands.Cog):
 
     def add_message(self, user_id: int, content: str, attachments: List[discord.Attachment] = None) -> bool:
         """Add a message to the model"""
-        content = content.replace(CHAIN_SPLIT, '').replace(CHAIN_END, '') if content else ''
+        content = content.replace(CHAIN_END, '') if content else ''
         if attachments and attachments[0].url:
             content += (' ' if content else '') + attachments[0].url
         if not content:
@@ -201,7 +200,6 @@ class Simulator(commands.Cog):
         tokens = [m.group(1) for m in TOKENIZER.finditer(content)]
         if not tokens:
             return False
-        tokens.insert(0, f"{user_id}{CHAIN_SPLIT}")
         tokens.append(CHAIN_END)
         previous = ""
         self.models.setdefault(int(user_id), UserModel(int(user_id), 0, {}))
