@@ -171,7 +171,8 @@ class Simulator(commands.Cog):
             await ctx.send(f"{type(error).__name__}: {error}\n"
                            f"Loaded {self.message_count} messages, "
                            f"{self.message_count // COMMIT_SIZE * COMMIT_SIZE} to database")
-        self.feeding = False
+        finally:
+            self.feeding = False
         asyncio.create_task(self.run_simulator())
         await ctx.send(f"Loaded {self.message_count} messages")
         await ctx.message.remove_reaction(EMOJI_LOADING, self.bot.user)
@@ -268,7 +269,7 @@ class Simulator(commands.Cog):
     async def run_simulator(self):
         """Run the simulator"""
         self.running = True
-        while self.running:
+        while self.running and not self.feeding:
             if self.conversation_left:
                 if random.random() < MESSAGE_CHANCE:
                     try:
@@ -319,11 +320,9 @@ class Simulator(commands.Cog):
 
     async def send_generated_message(self):
         user_id, phrase = self.generate_message()
-        try:
-            user = self.guild.get_member(int(user_id))
-            if user is None: raise ValueError
-        except ValueError:
-            raise ValueError(f"Can't find user")
+        user = self.guild.get_member(int(user_id))
+        if user is None:
+            return
         await self.webhook.send(username=user.display_name,
                                 avatar_url=user.avatar_url,
                                 content=phrase,
