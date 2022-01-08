@@ -230,6 +230,9 @@ class Simulator(commands.Cog):
 
     @staticmethod
     async def insert_message_db(message: discord.Message, db: sql.Connection):
+        content = message.content
+        if message.attachments and message.attachments[0].url:
+            content += (' ' if content else '') + message.attachments[0].url
         await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
                          [str(message.author.id), message.content])
 
