@@ -9,14 +9,13 @@ def get_prefix(bot: commands.Bot, message):
     m = re.match(fr'^({prefix}|<@!?{bot.user.id}>) ?,? ?', message.content, re.IGNORECASE)
     return m.group() if m else prefix
 
-bot = commands.Bot(command_prefix=get_prefix)
+bot = commands.Bot(command_prefix=get_prefix, activity=discord.Game('Minecraft'))
 
 with open('token.json') as f:
     bot.token = json.load(f)
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game('Minecraft'))
     print('Ready')
 
 for filename in os.listdir('./cogs'):
