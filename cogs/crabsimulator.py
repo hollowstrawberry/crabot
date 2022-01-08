@@ -83,6 +83,7 @@ class Simulator(commands.Cog):
         phrase = self.last_phrase
         while phrase == self.last_phrase:
             phrase = random.choice(crab.phrases)
+        self.last_phrase = phrase
         await self.webhook.send(username=crab.user.display_name,
                                 avatar_url=crab.user.avatar_url,
                                 content=phrase)
