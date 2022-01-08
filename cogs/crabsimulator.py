@@ -129,7 +129,7 @@ class Simulator(commands.Cog):
             messages = self.message_count
             nodes = reduce(add, [count_nodes(x.model) for x in self.models.values()])
             words = reduce(add, [count_words(x.model) for x in self.models.values()])
-        await ctx.send(f"```css\n#Messages: {messages}\n#Nodes: {nodes}\n#Words: {words}```")
+        await ctx.send(f"```yaml\nMessages: {messages}\nNodes: {nodes}\nWords: {words}```")
 
     @simulator.command()
     async def count(self, ctx: commands.Context, user: discord.Member, word):
@@ -139,8 +139,7 @@ class Simulator(commands.Cog):
             return
         occurences = reduce(add, [x.get(word, 0) for x in self.models[user.id].model.values()])
         children = len(self.models[user.id].model.get(word, {}))
-        childocc = reduce(add, self.models[user.id].model.get(word, {}).values())
-        await ctx.send(f"```css\n#Occurrences: {occurences}\n#Children: {children}\n#ChildOccurences: {childocc}\n```")
+        await ctx.send(f"```yaml\nOccurrences: {occurences}\nWords that follow: {children}")
 
     @simulator.command()
     @commands.is_owner()
