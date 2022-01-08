@@ -20,8 +20,9 @@ DB_FILE = "markov.sqlite"
 DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
-TOKENIZER = re.compile(r"(https?://|(?<=http://)\S+|(?<=https://)\S+|<[@#&!:\w]+\d+>|[\w'-]+|\W+)")
-#                        (match URLs but separate the start)        (mentions)      (words)(symbols)
+TOKENIZER = re.compile(r"(https?://|(?<=http://)\S+|(?<=https://)\S+"    # URLs, separate start
+                       r"|<(@|#|@!|@&)\d{10,20}>|<a?:\w+:(?=\d)|(?<=\w:)\d{10,20}>"  # mentions, separate emoji start
+                       r"|[\w'-]+|\W+)")  # words and symbols
 
 MESSAGE_CHANCE = 1/5
 CONVERSATION_CHANCE = 1/30
