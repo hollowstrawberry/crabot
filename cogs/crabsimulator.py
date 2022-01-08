@@ -70,8 +70,11 @@ class Simulator(commands.Cog):
                     if val is None:
                         continue
                     crab = Crab(int(key), val)
-                    crab.user = await self.guild.fetch_member(crab.user_id)
-                    self.crabs.append(crab)
+                    crab.user = self.guild.get_member(crab.user_id)
+                    if crab.user is not None:
+                        self.crabs.append(crab)
+                    else:
+                        print(f"User {crab.user_id} not found")
         except Exception as error:
             print(f'Failed to set up crab simulator: {error}')
             await self.channel.send(f'Failed to set up: {error}')
