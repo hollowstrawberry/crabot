@@ -5,6 +5,7 @@ config.json
 token.json
 tokens.json
 reputation.json
+markov.sqlite
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
