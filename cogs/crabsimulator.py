@@ -35,6 +35,22 @@ EMOJI_LOADING = '<a:loading:410612084527595520>'
 EMOJI_SUCCESS = '✅'
 EMOJI_FAILURE = '❌'
 
+def format_message(message: discord.Message) -> str:
+    content = message.content
+    if message.attachments and message.attachments[0].url:
+        content += (' ' if content else '') + message.attachments[0].url
+    return content
+
+async def insert_message_db(message: discord.Message, db: sql.Connection):
+    await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
+                     [str(message.author.id), format_message(message)])
+
+async def delete_message(message: discord.Message):
+    async with sql.connect(DB_FILE) as db:
+        await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE user_id=? and content=?',
+                         [str(message.author.id), format_message(message)])
+        await db.commit()
+
 @dataclass
 class UserModel:
     user_id: int
@@ -164,8 +180,8 @@ class Simulator(commands.Cog):
                         break
                     if message.author.bot:
                         continue
-                    if self.add_message(message.author.id, message.content, message.attachments):
-                        await self.insert_message_db(message, db)
+                    if self.add_message(message=message):
+                        await insert_message_db(message, db)
                         if self.message_count % COMMIT_SIZE == 0:
                             await db.commit()
                 await db.commit()
@@ -200,19 +216,32 @@ class Simulator(commands.Cog):
             return
         if message.author.bot or self.role not in message.author.roles:
             return
-        if self.add_message(message.author.id, message.content, message.attachments):
+        if self.add_message(message=message):
             async with sql.connect(DB_FILE) as db:
-                await self.insert_message_db(message, db)
+                await insert_message_db(message, db)
                 await db.commit()
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message: discord.Message):
+        """Processes new incoming messages"""
+        if message.guild != self.guild or message.channel != self.input_channel:
+            return
+        if message.author.bot or self.role not in message.author.roles:
+            return
+        await delete_message(message)
 
     def start_conversation(self):
         self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
 
-    def add_message(self, user_id: int, content: str, attachments: List[discord.Attachment] = None) -> bool:
+    def add_message(self,
+                    user_id: Optional[int] = None,
+                    content: Optional[str] = None,
+                    message: Optional[discord.Message] = None) -> bool:
         """Add a message to the model"""
+        if message:
+            user_id = message.author.id
+            content = format_message(message)
         content = content.replace(CHAIN_END, '') if content else ''
-        if attachments and attachments[0].url:
-            content += (' ' if content else '') + attachments[0].url
         if not content:
             return False
         tokens = [m.group(1) for m in TOKENIZER.finditer(content)]
@@ -236,14 +265,6 @@ class Simulator(commands.Cog):
             previous = token
         self.message_count += 1
         return True
-
-    @staticmethod
-    async def insert_message_db(message: discord.Message, db: sql.Connection):
-        content = message.content
-        if message.attachments and message.attachments[0].url:
-            content += (' ' if content else '') + message.attachments[0].url
-        await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
-                         [str(message.author.id), content])
 
     async def setup_simulator(self):
         """Set up the simulator"""
