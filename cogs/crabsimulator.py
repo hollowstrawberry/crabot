@@ -22,7 +22,7 @@ COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
 TOKENIZER = re.compile(r"(https?://\S+|<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # URLs, mentions
                        r"|[\w'-]+ ?|[^\w<]+|<)")  # words, symbols (exclude < to prevent breaking adjacent mentions)
-SUBTOKENIZER = re.compile(r"(https?://|(?<=http://)[^\s>]+|(?<=https://)[^\s>]+"  # separate URLs
+SUBTOKENIZER = re.compile(r"(https?://|(?<=://)[^\s>]+"  # separate URLs
                           r"|<a?:(?=\w)|\w+:\d{10,20}>)")  # separate emojis
 
 MESSAGE_CHANCE = 1/5
