@@ -26,7 +26,7 @@ SUBTOKENIZER = re.compile(r"(https?://|(?<=://)[^\s>]+"  # separate URLs
                           r"|<a?:(?=\w)|\w+:\d{10,20}>)")  # separate emojis
 
 MESSAGE_CHANCE = 1/5
-CONVERSATION_CHANCE = 1/30
+CONVERSATION_CHANCE = 1/45
 CONVERSATION_DELAY = 60
 CONVERSATION_MIN = 4
 CONVERSATION_MAX = 15
@@ -205,12 +205,13 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         """Processes new incoming messages"""
-        if message.channel == self.output_channel and not message.author.bot:
+        if message.channel == self.output_channel and message.type == discord.MessageType.default:
             try:
                 await message.delete()
             except:
                 pass
-            self.start_conversation()
+            if self.role in message.author.roles:
+                self.start_conversation()
             return
         if message.guild != self.guild or message.channel != self.input_channel:
             return
@@ -334,9 +335,13 @@ class Simulator(commands.Cog):
         result = "".join(result[:-1])
         # formatting
         if result.count('(') != result.count(')'):
-            result = result.replace('(', '').replace(')', '')
-        if result.count('"') % 2 == 1:
-            result = result.replace('"', '')
+            result = re.sub(r"((?<=\w)[)]|[(](?=\w))", "", result)  # should ignore smiley faces
+        for char in ['"', '||', '**', '*', '_']:
+            if result.count(char) % 2 == 1:
+                if result.strip().endswith(char):
+                    result = result.replace(char, '')
+                else:
+                    result += char
         return user_id, result
 
     @staticmethod
