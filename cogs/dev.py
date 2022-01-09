@@ -1,11 +1,14 @@
 import os
+import sys
 import io
 import traceback
 import textwrap
 from contextlib import redirect_stdout
 from discord.ext import commands
 from discord.ext.commands import Context
-import discord, re, json, hashlib, random  # for eval
+
+# used inside evals
+import discord, re, json, hashlib, random
 
 
 class Dev(commands.Cog):
@@ -91,6 +94,12 @@ class Dev(commands.Cog):
             await ctx.send(f'```{output}```')
         else:
             await ctx.message.add_reaction('✅')
+
+    @commands.command(aliases=['die', 'kys', 'reboot'])
+    @commands.is_owner()
+    async def restart(self, ctx: Context):
+        await ctx.message.add_reaction('<a:NOW:925563242779136040>')
+        sys.exit('Manual restart')
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: Context, error: commands.CommandError):
