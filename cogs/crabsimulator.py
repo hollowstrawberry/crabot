@@ -243,7 +243,7 @@ class Simulator(commands.Cog):
         if message.attachments and message.attachments[0].url:
             content += (' ' if content else '') + message.attachments[0].url
         await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
-                         [str(message.author.id), message.content])
+                         [str(message.author.id), content])
 
     async def setup_simulator(self):
         """Set up the simulator"""
