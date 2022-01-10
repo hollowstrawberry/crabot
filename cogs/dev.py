@@ -99,6 +99,7 @@ class Dev(commands.Cog):
     @commands.is_owner()
     async def restart(self, ctx: Context):
         await ctx.message.add_reaction('<a:NOW:925563242779136040>')
+        await self.bot.logout()
         sys.exit('Manual restart')
 
     @commands.Cog.listener()
