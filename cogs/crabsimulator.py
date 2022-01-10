@@ -20,8 +20,10 @@ DB_FILE = "markov.sqlite"
 DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
 CHAIN_END = "🔚"
-TOKENIZER = re.compile(r"(https?://[^\s>]+|<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # URLs, mentions
-                       r"|[\w'-]+ ?|[^\w<]+|<)")  # words, symbols (exclude < to prevent breaking adjacent mentions)
+TOKENIZER = re.compile(r"(https?://[^\s>]+"                # URLs
+                       r"|<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # mentions, emojis
+                       r"|@everyone|@here"                 # pings
+                       r"|[\w'-]+ ?|[^\w<]+|<)")           # words, symbols
 SUBTOKENIZER = re.compile(r"(https?://(?=[^\s>])|(?<=://)[^\s>]+"         # URLs
                           r"|<a?:(?=\w)|(?<=:)\w+:\d{10,20}>"             # emojis
                           r"|<[@#](?=[\d&!])|(?<=[@#])[!&]?\d{10,20}>)")  # mentions
