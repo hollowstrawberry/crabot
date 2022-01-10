@@ -28,7 +28,7 @@ SUBTOKENIZER = re.compile(r"(https?://(?=[^\s>])|(?<=://)[^\s>]+"         # URLs
                           r"|<a?:(?=\w)|(?<=:)\w+:\d{10,20}>"             # emojis
                           r"|<[@#](?=[\d&!])|(?<=[@#])[!&]?\d{10,20}>)")  # mentions
 MESSAGE_CHANCE = 1/5
-CONVERSATION_CHANCE = 1/45
+CONVERSATION_CHANCE = 1/40
 CONVERSATION_DELAY = 60
 CONVERSATION_MIN = 4
 CONVERSATION_MAX = 15
