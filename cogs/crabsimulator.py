@@ -343,7 +343,7 @@ class Simulator(commands.Cog):
         # formatting
         if result.count('(') != result.count(')'):
             result = re.sub(r"((?<=\w)[)]|[(](?=\w))", "", result)  # should ignore smiley faces
-        for char in ['"', '||', '**', '*', '_']:
+        for char in ['"', '||', '**', '*']:
             if result.count(char) % 2 == 1:
                 if result.strip().endswith(char):
                     result = result.replace(char, '')
