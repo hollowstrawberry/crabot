@@ -48,7 +48,7 @@ async def insert_message_db(message: discord.Message, db: sql.Connection):
                      [str(message.author.id), format_message(message)])
 
 async def delete_message_db(message: discord.Message, db: sql.Connection):
-    await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE user_id=? and content=?;',
+    await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE user_id=? and content=? LIMIT 1;',
                      [str(message.author.id), format_message(message)])
 
 @dataclass
