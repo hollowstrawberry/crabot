@@ -45,11 +45,9 @@ async def insert_message_db(message: discord.Message, db: sql.Connection):
     await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
                      [str(message.author.id), format_message(message)])
 
-async def delete_message(message: discord.Message):
-    async with sql.connect(DB_FILE) as db:
-        await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE user_id=? and content=?',
-                         [str(message.author.id), format_message(message)])
-        await db.commit()
+async def delete_message_db(message: discord.Message, db: sql.Connection):
+    await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE user_id=? and content=?;',
+                     [str(message.author.id), format_message(message)])
 
 @dataclass
 class UserModel:
@@ -77,23 +75,8 @@ class Simulator(commands.Cog):
         self.running = False
         self.feeding = False
 
-    @commands.group()
-    async def simulator(self, ctx: commands.Context):
-        """Commands for the crab conversation simulator"""
-        if ctx.invoked_subcommand is None:
-            await ctx.send(f"Do `help simulator` for commands")
-
-    @simulator.command()
-    async def trigger(self, ctx: commands.Context):
-        """Trigger a crab simulator conversation"""
-        if self.role not in ctx.author.roles:
-            await ctx.message.add_reaction(EMOJI_FAILURE)
-            return
-        self.start_conversation()
-        await ctx.message.add_reaction(EMOJI_SUCCESS)
-
-    @simulator.command()
-    async def start(self, ctx: commands.Context):
+    @commands.command()
+    async def startsimulator(self, ctx: commands.Context):
         """Start the simulator"""
         if self.role not in ctx.author.roles:
             await ctx.message.add_reaction(EMOJI_FAILURE)
@@ -102,8 +85,8 @@ class Simulator(commands.Cog):
             asyncio.create_task(self.run_simulator())
         await ctx.message.add_reaction(EMOJI_SUCCESS)
 
-    @simulator.command()
-    async def stop(self, ctx: commands.Context):
+    @commands.command()
+    async def stopsimulator(self, ctx: commands.Context):
         """Stop the simulator"""
         if self.role not in ctx.author.roles:
             await ctx.message.add_reaction(EMOJI_FAILURE)
@@ -111,7 +94,7 @@ class Simulator(commands.Cog):
         self.running = False
         await ctx.message.add_reaction(EMOJI_SUCCESS)
 
-    @simulator.command()
+    @commands.command()
     async def stats(self, ctx: commands.Context, user: Optional[discord.Member]):
         """Statistics about the simulator, globally or for a user"""
         if self.role not in ctx.author.roles:
@@ -149,19 +132,24 @@ class Simulator(commands.Cog):
             words = reduce(add, [count_words(x.model) for x in self.models.values()])
         await ctx.send(f"```yaml\nMessages: {messages:,}\nNodes: {nodes:,}\nWords: {words:,}```")
 
-    @simulator.command()
-    async def count(self, ctx: commands.Context, user: discord.Member, word):
-        """Count instances of a word for a specific user"""
-        if user.id not in self.models:
-            await ctx.send('User not found')
-            return
-        occurences = reduce(add, [x.get(word, 0) for x in self.models[user.id].model.values()])
-        children = len(self.models[user.id].model.get(word, {}))
+    @commands.command()
+    async def count(self, ctx: commands.Context, word: str, user: Optional[discord.Member] = None):
+        """Count instances of a word, globally or for a user"""
+        if user:
+            if user.id not in self.models:
+                await ctx.send("This users' messages are not being recorded")
+                return
+            occurences = reduce(add, [x.get(word, 0) for x in self.models[user.id].model.values()])
+            children = len(self.models[user.id].model.get(word, {}))
+        else:
+            occurences = reduce(add, [reduce(add, [x.get(word, 0) for x in m.model.values()])
+                                      for m in self.models.values()])
+            children = reduce(add, [len(m.model.get(word, {})) for m in self.models.values()])
         await ctx.send(f"```yaml\nOccurrences: {occurences:,}\nWords that follow: {children:,}```")
 
-    @simulator.command()
+    @commands.command()
     @commands.is_owner()
-    async def feed(self, ctx: commands.Context, days: int):
+    async def feedsimulator(self, ctx: commands.Context, days: int):
         """Feed past messages into the simulator"""
         await ctx.message.add_reaction(EMOJI_LOADING)
         self.running = False
@@ -205,34 +193,37 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         """Processes new incoming messages"""
-        if message.channel == self.output_channel and message.type == discord.MessageType.default:
+        if message.channel == self.input_channel and not message.author.bot and self.role in message.author.roles:
+            if self.add_message(message=message):
+                async with sql.connect(DB_FILE) as db:
+                    await insert_message_db(message, db)
+                    await db.commit()
+        elif message.channel == self.output_channel and not message.author.bot \
+                and message.type == discord.MessageType.default:
             try:
                 await message.delete()
             except:
                 pass
             if self.role in message.author.roles:
                 self.start_conversation()
-            return
-        if message.guild != self.guild or message.channel != self.input_channel:
-            return
-        if message.author.bot or self.role not in message.author.roles:
-            return
-        if self.add_message(message=message):
-            async with sql.connect(DB_FILE) as db:
-                await insert_message_db(message, db)
-                await db.commit()
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
-        """Processes new incoming messages"""
-        if message.guild != self.guild or message.channel != self.input_channel:
-            return
-        if message.author.bot or self.role not in message.author.roles:
-            return
-        await delete_message(message)
+        """Processes deleted messages"""
+        if message.channel == self.input_channel and not message.author.bot and self.role in message.author.roles:
+            async with sql.connect(DB_FILE) as db:
+                await delete_message_db(message, db)
+                await db.commit()
 
-    def start_conversation(self):
-        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
+    @commands.Cog.listener()
+    async def on_message_edit(self, message: discord.Message, edited: discord.Message):
+        """Processes edited messages"""
+        if message.channel == self.input_channel and not message.author.bot and self.role in message.author.roles:
+            async with sql.connect(DB_FILE) as db:
+                await delete_message_db(message, db)
+                if self.add_message(message=edited):
+                    await insert_message_db(edited, db)
+                await db.commit()
 
     def add_message(self,
                     user_id: Optional[int] = None,
@@ -287,6 +278,7 @@ class Simulator(commands.Cog):
             async with sql.connect(DB_FILE) as db:
                 await db.execute(f"CREATE TABLE IF NOT EXISTS {DB_TABLE_MESSAGES} "
                                  f"(user_id TEXT NOT NULL, content TEXT NOT NULL);")
+                await db.commit()
                 async with db.execute(f"SELECT * FROM {DB_TABLE_MESSAGES}") as cursor:
                     async for row in cursor:
                         self.add_message(int(row[0]), row[1])
@@ -320,6 +312,19 @@ class Simulator(commands.Cog):
                         break
                     await asyncio.sleep(1)
 
+    def start_conversation(self):
+        self.conversation_left = random.randrange(CONVERSATION_MIN, CONVERSATION_MAX + 1)
+
+    async def send_generated_message(self):
+        user_id, content = self.generate_message()
+        user = self.guild.get_member(int(user_id))
+        if user is None:
+            return
+        await self.webhook.send(username=user.display_name,
+                                avatar_url=user.avatar_url,
+                                content=content,
+                                allowed_mentions=discord.AllowedMentions.none())
+
     def generate_message(self) -> (int, str):
         """Generate text based on the models"""
         user_id, = random.choices(population=list(self.models.keys()),
@@ -329,7 +334,9 @@ class Simulator(commands.Cog):
         token = ""
         previous = token
         while token != CHAIN_END:
-            token = self.generate_token(self.models[user_id].model, previous)
+            token, = random.choices(population=list(self.models[user_id].model[previous].keys()),
+                                    weights=list(self.models[user_id].model[previous].values()),
+                                    k=1)
             result.append(token)
             previous = token
         result = "".join(result[:-1])
@@ -343,24 +350,6 @@ class Simulator(commands.Cog):
                 else:
                     result += char
         return user_id, result
-
-    @staticmethod
-    def generate_token(model: dict, previous: str) -> str:
-        """Where the magic happens"""
-        gram, = random.choices(population=list(model[previous].keys()),
-                               weights=list(model[previous].values()),
-                               k=1)
-        return gram
-
-    async def send_generated_message(self):
-        user_id, content = self.generate_message()
-        user = self.guild.get_member(int(user_id))
-        if user is None:
-            return
-        await self.webhook.send(username=user.display_name,
-                                avatar_url=user.avatar_url,
-                                content=content,
-                                allowed_mentions=discord.AllowedMentions.none())
 
 
 def setup(bot: commands.Bot):
