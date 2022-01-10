@@ -19,11 +19,12 @@ WEBHOOK_NAME = "CrabSimulator"
 DB_FILE = "markov.sqlite"
 DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
+
 CHAIN_END = "🔚"
 TOKENIZER = re.compile(r"(https?://[^\s>]+"                # URLs
                        r"|<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # mentions, emojis
                        r"|@everyone|@here"                 # pings
-                       r"|[\w'-]+ ?|[^\w<]+|<)")           # words, symbols
+                       r"| ?[\w'-]+|[^\w<]+|<)")           # words, symbols
 SUBTOKENIZER = re.compile(r"(https?://(?=[^\s>])|(?<=://)[^\s>]+"         # URLs
                           r"|<a?:(?=\w)|(?<=:)\w+:\d{10,20}>"             # emojis
                           r"|<[@#](?=[\d&!])|(?<=[@#])[!&]?\d{10,20}>)")  # mentions
@@ -341,16 +342,22 @@ class Simulator(commands.Cog):
                                     k=1)
             result.append(token)
             previous = token
-        result = "".join(result[:-1])
+        result = "".join(result[:-1]).strip()
         # formatting
         if result.count('(') != result.count(')'):
-            result = re.sub(r"((?<=\w)[)]|[(](?=\w))", "", result)  # should ignore smiley faces
-        for char in ['"', '||', '**', '*']:
-            if result.count(char) % 2 == 1:
-                if result.strip().endswith(char):
-                    result = result.replace(char, '')
+            result = re.sub(r"((?<=\w)[)]|[(](?=\w))", "", result)  # remove them and ignore smiley faces
+        for left, right in [('[', ']'), ('“', '”'), ('‘', '’'), ('«', '»')]:
+            if result.count(left) != result.count(right):
+                if result.count(left) > result.count(right) and not result.endswith(left):
+                    result += right
                 else:
+                    result = result.replace(left, '').replace(right, '')
+        for char in ['"', '||', '**', '__', '```', '`']:
+            if result.count(char) % 2 == 1:
+                if not result.endswith(char):
                     result += char
+                else:
+                    result = result.replace(char, '')
         return user_id, result
 
 
