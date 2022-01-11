@@ -111,6 +111,24 @@ class Fun(commands.Cog):
         await ctx.send(f'{count} {donut}')
         print(f'User {ctx.author.id} now has {count} donuts')
 
+    @commands.command()
+    async def steal(self, ctx: Context):
+        """Steals an emoji you reply to"""
+        reference = ctx.message.reference
+        if not reference:
+            await ctx.send("Reply to a message with this command to steal an emoji")
+            return
+        message = reference.cached_message or await ctx.channel.fetch_message(reference.message_id)
+        if not message:
+            await ctx.send("I couldn't grab that message, sorry")
+            return
+        emojis = re.findall(r"<(a?):\w+:(\d{10,20})>", message.content)
+        if not emojis:
+            await ctx.send("Can't find an emoji in that message")
+            return
+        response = '\n'.join(f"https://cdn.discordapp.com/emojis/{m[1]}.{'gif' if m[0] else 'png'}" for m in emojis)
+        await ctx.send(response)
+
     @commands.command(name="+1", aliases=["rep", "giverep"])
     @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
     async def rep(self, ctx: Context, user: discord.User = None):
