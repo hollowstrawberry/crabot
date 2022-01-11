@@ -38,7 +38,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         return f'{command.qualified_name} {command.signature}'
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title='Grey Commands', colour=self.COLOR)
+        embed = discord.Embed(title='Crab Commands', colour=self.COLOR)
         for cog, cmds in mapping.items():
             name = 'No Category' if cog is None else cog.qualified_name
             filtered = await self.filter_commands(cmds, sort=True)

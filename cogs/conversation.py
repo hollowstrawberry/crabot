@@ -97,8 +97,7 @@ class Conversation(commands.Cog):
     @commands.command()
     async def about(self, ctx: Context):
         """Describe myself. Responds to *who are you/tell me about you/etc*"""
-        await ctx.send("I'm Smoke, a bot made for fun in homage to my friend Sam. "
-                       "My owner is <@871733390251012147>")
+        await ctx.send("I'm Crabot, a bot made for fun by <@871733390251012147>")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

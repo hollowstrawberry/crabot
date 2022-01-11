@@ -4,9 +4,9 @@ import json
 import os
 from discord.ext import commands
 
-prefix = 'smoke'
+prefix = 'crab'
 def get_prefix(bot: commands.Bot, message):
-    m = re.match(fr'^({prefix}|<@!?{bot.user.id}>) ?,? ?', message.content, re.IGNORECASE)
+    m = re.match(fr'^({prefix}|<@!?{bot.user.id}>),? ?', message.content, re.IGNORECASE)
     return m.group() if m else prefix
 
 intents = discord.Intents(members=True, guilds=True, guild_messages=True)
