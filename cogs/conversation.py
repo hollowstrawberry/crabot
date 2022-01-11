@@ -12,14 +12,14 @@ class Conversation(commands.Cog):
     hi_msgs = [
         'hi!', 'hello', 'hey']
     pain_emotes = [
-        '<:painpeko:846703815692648448>', '<:pain:756862045604806746>', '<:hidethepain:756862045194027008>']
+        '<:hidethepain:930543584451645481>', '<:manhorsebeach:930543592995426314>', '<:painpeko:930543612658327562>']
     food_emotes = [
         '🍜', '🍿', '🥒', '🧋', '🧈', '🧀' ]
     cry_emotes = [
         '😢', '😭', '😿', '<:peeposad:757725678878851112>',
-        '<:vivicry:757245413626740847>', '<:dylancry:865017375756648448>']
+        '<:vivicry:757245413626740847>', '<:dylancry:930543573466742844>']
     blush_emotes = [
-        '😳', '<:bigflush:756867044846075955>', '<:viviflushed:757564758529540206>']
+        '😳', '<:bigflush:930543561689161748>', '<:viviflushed:757564758529540206>']
     workout_emotes = [
         '🏋️‍♀️', '🦵', '💪']
     crisis_msgs = [
@@ -118,7 +118,7 @@ class Conversation(commands.Cog):
                     content):
             return await self.eat(ctx)
 
-        if re.match(r"(who a?re? y?o?u|what a?re? y?o?u|tell me about y?o?u|what'? ?i?s y?o?ur name) ?\??", content):
+        if re.match(r"(who a?re? y?o?u|what a?re? y?o?u|tell me about y?o?u|what'? ?i?s y?o?ur (name|purpose)) ?\??", content):
             return await self.about(ctx)
 
         if re.match(r"(how a?re? y?o?u|a?re? y?o?u (sad|fine|happy|okay|depressed)"

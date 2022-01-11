@@ -98,7 +98,7 @@ class Dev(commands.Cog):
     @commands.command(aliases=['die', 'kys', 'reboot'])
     @commands.is_owner()
     async def restart(self, ctx: Context):
-        await ctx.message.add_reaction('<a:NOW:925563242779136040>')
+        await ctx.message.add_reaction('<a:NOW:930543555682926644>')
         await self.bot.logout()
         sys.exit('Manual restart')
 
