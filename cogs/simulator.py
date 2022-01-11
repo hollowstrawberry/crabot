@@ -10,10 +10,10 @@ from operator import add
 from datetime import datetime, timedelta
 from discord.ext import commands
 
-GUILD_ID = 756395872811483177
-INPUT_CHANNEL_ID = 756409304894144575
-OUTPUT_CHANNEL_ID = 929193206472671262
-ROLE_ID = 756398304052641953
+GUILD_ID = 930471371128061962
+INPUT_CHANNEL_IDS = [930471825668988959, 930471371128061965]
+OUTPUT_CHANNEL_ID = 930472235527983174
+ROLE_ID = 930489841421004830
 WEBHOOK_NAME = "CrabSimulator"
 
 DB_FILE = "messages.db"
@@ -65,7 +65,7 @@ class Simulator(commands.Cog):
         self.running = False
         self.feeding = False
         self.guild: Optional[discord.Guild] = None
-        self.input_channel: Optional[discord.TextChannel] = None
+        self.input_channels: Optional[List[discord.TextChannel]] = None
         self.output_channel: Optional[discord.TextChannel] = None
         self.role: Optional[discord.Role] = None
         self.webhook: Optional[discord.Webhook] = None
@@ -168,7 +168,7 @@ class Simulator(commands.Cog):
                 await db.execute(f"DELETE FROM {DB_TABLE_MESSAGES}")
                 await db.commit()
                 start_date = datetime.now() - timedelta(days=days)
-                async for message in self.input_channel.history(after=start_date, limit=None):
+                async for message in ctx.channel.history(after=start_date, limit=None):
                     if not self.feeding:
                         break
                     if message.author.bot:
@@ -198,7 +198,7 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         """Processes new incoming messages"""
-        if message.channel == self.input_channel and not message.author.bot and self.role in message.author.roles:
+        if message.channel in self.input_channels and not message.author.bot and self.role in message.author.roles:
             if self.add_message(message=message):
                 async with sql.connect(DB_FILE) as db:
                     await insert_message_db(message, db)
@@ -215,7 +215,7 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         """Processes deleted messages"""
-        if message.channel == self.input_channel and not message.author.bot and self.role in message.author.roles:
+        if message.channel in self.input_channels and not message.author.bot and self.role in message.author.roles:
             async with sql.connect(DB_FILE) as db:
                 await delete_message_db(message, db)
                 await db.commit()
@@ -223,7 +223,7 @@ class Simulator(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, message: discord.Message, edited: discord.Message):
         """Processes edited messages"""
-        if message.channel == self.input_channel and not message.author.bot and self.role in message.author.roles:
+        if message.channel in self.input_channels and not message.author.bot and self.role in message.author.roles:
             async with sql.connect(DB_FILE) as db:
                 await delete_message_db(message, db)
                 if self.add_message(message=edited):
@@ -268,12 +268,12 @@ class Simulator(commands.Cog):
         try:
             # discord entities
             self.guild = self.bot.get_guild(GUILD_ID)
-            self.role = self.guild.get_role(ROLE_ID)
-            self.input_channel = self.guild.get_channel(INPUT_CHANNEL_ID)
-            self.output_channel = self.guild.get_channel(OUTPUT_CHANNEL_ID)
             if self.guild is None: raise KeyError(self.guild.__name__)
+            self.role = self.guild.get_role(ROLE_ID)
+            self.input_channels = [self.guild.get_channel(i) for i in INPUT_CHANNEL_IDS]
+            self.output_channel = self.guild.get_channel(OUTPUT_CHANNEL_ID)
             if self.role is None: raise KeyError(self.role.__name__)
-            if self.input_channel is None: raise KeyError(self.input_channel.__name__)
+            if any(c is None for c in self.input_channels): raise KeyError(self.input_channels.__name__)
             if self.output_channel is None: raise KeyError(self.output_channel.__name__)
             webhooks = await self.output_channel.webhooks()
             webhooks = [w for w in webhooks if w.user == self.bot.user and w.name == WEBHOOK_NAME]
