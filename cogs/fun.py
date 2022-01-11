@@ -5,6 +5,7 @@ import hashlib
 import aiohttp
 import discord
 import cv2
+import async_cse
 from PIL import Image
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -31,6 +32,7 @@ class Fun(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.google = async_cse.Search(self.bot.token['google'])
 
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
     async def quick(self, ctx: Context, *, query: commands.clean_content):
@@ -50,6 +52,24 @@ class Fun(commands.Cog):
                     to_send = text
                 await ctx.send(to_send)
                 print(f"quick {query}")
+
+    @commands.command(aliases=['search'])
+    async def google(self, ctx: Context, *, query: commands.clean_content):
+        """Search something on Google"""
+        await ctx.channel.trigger_typing()
+        try:
+            result = await self.google.search(str(query), safesearch=not ctx.channel.nsfw)
+        except Exception as error:
+            await ctx.send(f"{type(error).__name__}: {error}")
+            return
+        if not result or not result[0]:
+            await ctx.send("No results")
+            return
+        embed = discord.Embed(title=result[0].title[:255], description=result[0].description[:1990],
+                              url=result[0].url, color=0xffffff)
+        if result[0].image_url:
+            embed.set_thumbnail(url=result[0].image_url)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def rate(self, ctx: Context, *, thing):
