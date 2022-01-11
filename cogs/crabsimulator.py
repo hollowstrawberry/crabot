@@ -21,13 +21,14 @@ DB_TABLE_MESSAGES = "messages"
 COMMIT_SIZE = 1000
 
 CHAIN_END = "🔚"
-TOKENIZER = re.compile(r"(https?://[^\s>]+"                # URLs
-                       r"|<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # mentions, emojis
-                       r"|@everyone|@here"                 # pings
-                       r"| ?[\w'-]+|[^\w<]+|<)")           # words, symbols
-SUBTOKENIZER = re.compile(r"(https?://(?=[^\s>])|(?<=://)[^\s>]+"         # URLs
-                          r"|<a?:(?=\w)|(?<=:)\w+:\d{10,20}>"             # emojis
-                          r"|<[@#](?=[\d&!])|(?<=[@#])[!&]?\d{10,20}>)")  # mentions
+TOKENIZER = re.compile(r"( ?https?://[^\s>]+"                # URLs
+                       r"| ?<(@|#|@!|@&|a?:\w+:)\d{10,20}>"  # mentions, emojis
+                       r"| ?@everyone| ?@here"               # pings
+                       r"| ?[\w'-]+"                         # words
+                       r"|[^\w<]+|<)")                       # symbols
+SUBTOKENIZER = re.compile(r"( ?https?://(?=[^\s>])|(?<=://)[^\s>]+"         # URLs
+                          r"| ?<a?:(?=\w)|(?<=:)\w+:\d{10,20}>"             # emojis
+                          r"| ?<[@#](?=[\d&!])|(?<=[@#])[!&]?\d{10,20}>)")  # mentions
 MESSAGE_CHANCE = 1/5
 CONVERSATION_CHANCE = 1/40
 CONVERSATION_DELAY = 60
@@ -138,16 +139,17 @@ class Simulator(commands.Cog):
     @commands.command()
     async def count(self, ctx: commands.Context, word: str, user: Optional[discord.Member] = None):
         """Count instances of a word, globally or for a user"""
+        sword = ' ' + word
         if user:
             if user.id not in self.models:
                 await ctx.send("This users' messages are not being recorded")
                 return
-            occurences = reduce(add, [x.get(word, 0) for x in self.models[user.id].model.values()])
-            children = len(self.models[user.id].model.get(word, {}))
+            occurences = reduce(add, [x.get(word, 0) + x.get(sword, 0) for x in self.models[user.id].model.values()])
+            children = len(self.models[user.id].model.get(word, {}) | self.models[user.id].model.get(sword, {}))
         else:
-            occurences = reduce(add, [reduce(add, [x.get(word, 0) for x in m.model.values()])
+            occurences = reduce(add, [reduce(add, [x.get(word, 0) + x.get(sword, 0) for x in m.model.values()])
                                       for m in self.models.values()])
-            children = reduce(add, [len(m.model.get(word, {})) for m in self.models.values()])
+            children = reduce(add, [len(m.model.get(word, {}) | m.model.get(sword, {})) for m in self.models.values()])
         await ctx.send(f"```yaml\nOccurrences: {occurences:,}\nWords that follow: {children:,}```")
 
     @commands.command()
@@ -248,6 +250,7 @@ class Simulator(commands.Cog):
                 tokens.pop(i)
                 for j in range(len(subtokens)):
                     tokens.insert(i+j, subtokens[j])
+        print(tokens)
         tokens.append(CHAIN_END)
         previous = ""
         self.models.setdefault(int(user_id), UserModel(int(user_id), 0, {}))
