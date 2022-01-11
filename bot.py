@@ -4,7 +4,7 @@ import json
 import os
 from discord.ext import commands
 
-DEFAULTPREFIX = '%'
+DEFAULTPREFIX = '!'
 
 def get_prefix(bot: commands.Bot, message):
     try:
