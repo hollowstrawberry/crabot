@@ -250,7 +250,6 @@ class Simulator(commands.Cog):
                 tokens.pop(i)
                 for j in range(len(subtokens)):
                     tokens.insert(i+j, subtokens[j])
-        print(tokens)
         tokens.append(CHAIN_END)
         previous = ""
         self.models.setdefault(int(user_id), UserModel(int(user_id), 0, {}))
