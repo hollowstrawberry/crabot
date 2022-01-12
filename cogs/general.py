@@ -38,13 +38,14 @@ class EmbedHelpCommand(commands.HelpCommand):
         return f'{command.qualified_name} {command.signature}'
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title='Crab Commands', colour=self.COLOR)
+        embed = discord.Embed(title='Crab Commands', colour=self.COLOR,
+                              description="Use help again on a command or category for more information!")
         for cog, cmds in mapping.items():
             name = 'No Category' if cog is None else cog.qualified_name
             filtered = await self.filter_commands(cmds, sort=True)
             if filtered:
-                value = '\n'.join(f'`{c.name}` - {c.short_doc}' for c in filtered)
-                embed.add_field(name=name, value=value, inline=False)
+                value = ', '.join(f'`{c.name}`' for c in filtered)
+                embed.add_field(name=name, value=value, inline=True)
 
         await self.get_destination().send(embed=embed)
 

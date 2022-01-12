@@ -98,6 +98,7 @@ class Dev(commands.Cog):
     @commands.command(aliases=['die', 'kys', 'reboot'])
     @commands.is_owner()
     async def restart(self, ctx: Context):
+        """Shuts down the bot"""
         await ctx.message.add_reaction('<a:NOW:930543555682926644>')
         await self.bot.logout()
         sys.exit('Manual restart')

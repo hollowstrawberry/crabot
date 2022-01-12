@@ -6,10 +6,12 @@ import aiohttp
 import discord
 import cv2
 import async_cse
+import requests
+import shutil
 from PIL import Image
 from discord.ext import commands
 from discord.ext.commands import Context
-from typing import Union
+from typing import *
 
 
 class Fun(commands.Cog):
@@ -131,9 +133,8 @@ class Fun(commands.Cog):
         await ctx.send(f'{count} {donut}')
         print(f'User {ctx.author.id} now has {count} donuts')
 
-    @commands.command()
-    async def steal(self, ctx: Context):
-        """Steals an emoji you reply to"""
+    @staticmethod
+    async def get_emoji(ctx: Context) -> Optional[List[Tuple[str]]]:
         reference = ctx.message.reference
         if not reference:
             await ctx.send("Reply to a message with this command to steal an emoji")
@@ -146,8 +147,35 @@ class Fun(commands.Cog):
         if not emojis:
             await ctx.send("Can't find an emoji in that message")
             return
+        return emojis
+
+    @commands.group()
+    async def steal(self, ctx: Context):
+        """Steals emojis you reply to"""
+        if ctx.invoked_subcommand:
+            return
+        if not (emojis := await self.get_emoji(ctx)):
+            return
         response = '\n'.join(f"https://cdn.discordapp.com/emojis/{m[1]}.{'gif' if m[0] else 'png'}" for m in emojis)
         await ctx.send(response)
+
+    @steal.command()
+    async def upload(self, ctx: Context):
+        """Steals emojis you reply to, and uploads it to the server"""
+        if not ctx.message.author.guild_permissions.manage_emojis:
+            await ctx.send("You don't have permission to manage emojis")
+            return
+        if not (emojis := await self.get_emoji(ctx)):
+            return
+        for e in emojis:
+            emoji = await ctx.guild.fetch_emoji(int(e[1]))
+            image = requests.get(str(emoji.url), stream=True)
+            try:
+                await ctx.guild.create_custom_emoji(name=emoji.name, image=image.raw)
+            except Exception as error:
+                await ctx.send(f"Couldn't upload {emoji.name}, {type(error).__name__}: {error}")
+                return
+        await ctx.message.add_reaction('✅')
 
     @commands.command(name="+1", aliases=["rep", "giverep"])
     @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
