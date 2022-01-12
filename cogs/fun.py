@@ -2,12 +2,11 @@ import os
 import re
 import json
 import hashlib
-import aiohttp
+import io
 import discord
 import cv2
 import async_cse
-import requests
-import shutil
+import aiohttp
 from PIL import Image
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -156,8 +155,8 @@ class Fun(commands.Cog):
             return
         if not (emojis := await self.get_emoji(ctx)):
             return
-        response = '\n'.join(f"https://cdn.discordapp.com/emojis/{m[1]}.{'gif' if m[0] else 'png'}" for m in emojis)
-        await ctx.send(response)
+        links = '\n'.join(f"https://cdn.discordapp.com/emojis/{m[1]}.{'gif' if m[0] else 'png'}" for m in emojis)
+        await ctx.send(links)
 
     @steal.command()
     async def upload(self, ctx: Context):
@@ -167,14 +166,16 @@ class Fun(commands.Cog):
             return
         if not (emojis := await self.get_emoji(ctx)):
             return
-        for e in emojis:
-            emoji = await ctx.guild.fetch_emoji(int(e[1]))
-            image = requests.get(str(emoji.url), stream=True)
-            try:
-                await ctx.guild.create_custom_emoji(name=emoji.name, image=image.raw)
-            except Exception as error:
-                await ctx.send(f"Couldn't upload {emoji.name}, {type(error).__name__}: {error}")
-                return
+        async with aiohttp.ClientSession() as session:
+            for e in emojis:
+                emoji = await ctx.guild.fetch_emoji(int(e[1]))
+                async with session.get(str(emoji.url)) as resp:
+                    image = io.BytesIO(await resp.read()).read()
+                try:
+                    await ctx.guild.create_custom_emoji(name=emoji.name, image=image)
+                except Exception as error:
+                    await ctx.send(f"Couldn't upload {emoji.name}, {type(error).__name__}: {error}")
+                    return
         await ctx.message.add_reaction('✅')
 
     @commands.command(name="+1", aliases=["rep", "giverep"])
