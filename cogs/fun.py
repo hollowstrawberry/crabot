@@ -133,7 +133,7 @@ class Fun(commands.Cog):
         print(f'User {ctx.author.id} now has {count} donuts')
 
     @staticmethod
-    async def get_emoji(ctx: Context) -> Optional[List[Tuple[str]]]:
+    async def get_emojis(ctx: Context) -> Optional[List[Tuple[str]]]:
         reference = ctx.message.reference
         if not reference:
             await ctx.send("Reply to a message with this command to steal an emoji")
@@ -142,7 +142,7 @@ class Fun(commands.Cog):
         if not message:
             await ctx.send("I couldn't grab that message, sorry")
             return
-        emojis = re.findall(r"<(a?):\w+:(\d{10,20})>", message.content)
+        emojis = re.findall(r"<(a?):(\w+):(\d{10,20})>", message.content)
         if not emojis:
             await ctx.send("Can't find an emoji in that message")
             return
@@ -153,10 +153,10 @@ class Fun(commands.Cog):
         """Steals emojis you reply to"""
         if ctx.invoked_subcommand:
             return
-        if not (emojis := await self.get_emoji(ctx)):
+        if not (emojis := await self.get_emojis(ctx)):
             return
-        links = '\n'.join(f"https://cdn.discordapp.com/emojis/{m[1]}.{'gif' if m[0] else 'png'}" for m in emojis)
-        await ctx.send(links)
+        links = [f"https://cdn.discordapp.com/emojis/{m[2]}.{'gif' if m[0] else 'png'}" for m in emojis]
+        await ctx.send('\n'.join(links))
 
     @steal.command()
     async def upload(self, ctx: Context):
@@ -164,17 +164,21 @@ class Fun(commands.Cog):
         if not ctx.message.author.guild_permissions.manage_emojis:
             await ctx.send("You don't have permission to manage emojis")
             return
-        if not (emojis := await self.get_emoji(ctx)):
+        if not (emojis := await self.get_emojis(ctx)):
             return
         async with aiohttp.ClientSession() as session:
-            for e in emojis:
-                emoji = await ctx.guild.fetch_emoji(int(e[1]))
-                async with session.get(str(emoji.url)) as resp:
-                    image = io.BytesIO(await resp.read()).read()
+            for emoji in emojis:
+                link = f"https://cdn.discordapp.com/emojis/{emoji[2]}.{'gif' if emoji[0] else 'png'}"
                 try:
-                    await ctx.guild.create_custom_emoji(name=emoji.name, image=image)
+                    async with session.get(link) as resp:
+                        image = io.BytesIO(await resp.read()).read()
                 except Exception as error:
-                    await ctx.send(f"Couldn't upload {emoji.name}, {type(error).__name__}: {error}")
+                    await ctx.send(f"Couldn't download {emoji[1]}, {type(error).__name__}: {error}")
+                    return
+                try:
+                    await ctx.guild.create_custom_emoji(name=emoji[1], image=image)
+                except Exception as error:
+                    await ctx.send(f"Couldn't upload {emoji[1]}, {type(error).__name__}: {error}")
                     return
         await ctx.message.add_reaction('✅')
 
