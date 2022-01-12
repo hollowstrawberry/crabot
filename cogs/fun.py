@@ -176,11 +176,14 @@ class Fun(commands.Cog):
                     await ctx.send(f"Couldn't download {emoji[1]}, {type(error).__name__}: {error}")
                     return
                 try:
-                    await ctx.guild.create_custom_emoji(name=emoji[1], image=image)
+                    added = await ctx.guild.create_custom_emoji(name=emoji[1], image=image)
                 except Exception as error:
                     await ctx.send(f"Couldn't upload {emoji[1]}, {type(error).__name__}: {error}")
                     return
-        await ctx.message.add_reaction('✅')
+                try:
+                    await ctx.message.add_reaction(added)
+                except:
+                    pass
 
     @commands.command(name="+1", aliases=["rep", "giverep"])
     @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
