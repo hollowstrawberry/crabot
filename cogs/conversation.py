@@ -12,7 +12,7 @@ class Conversation(commands.Cog):
     hi_msgs = [
         'hi!', 'hello', 'hey']
     pain_emotes = [
-        '<:hidethepain:930543584451645481>', '<:manhorsebeach:930543592995426314>', '<:painpeko:930543612658327562>']
+        '<:hidethepain:930543584451645481>', '<:PainPeko:930952994344808478>', '<:manhorsebeach:930543592995426314>']
     food_emotes = [
         '🍜', '🍿', '🥒', '🧋', '🧈', '🧀' ]
     cry_emotes = [
