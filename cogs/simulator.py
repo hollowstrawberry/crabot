@@ -146,7 +146,7 @@ class Simulator(commands.Cog):
             children = len(self.models[user.id].model.get(word, {}) | self.models[user.id].model.get(sword, {}))
         else:
             occurences = sum(sum(x.get(word, 0) + x.get(sword, 0) for x in m.model.values())
-                             for m in self.models.values()])
+                             for m in self.models.values())
             children = sum(len(m.model.get(word, {}) | m.model.get(sword, {})) for m in self.models.values())
         await ctx.send(f"```yaml\nOccurrences: {occurences:,}\nWords that follow: {children:,}```")
 
