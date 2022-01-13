@@ -41,7 +41,7 @@ class General(commands.Cog):
         """Sends the code that makes up a command or function of this bot"""
         predicate = lambda x: inspect.ismethod(x) or isinstance(x, commands.Command)
         functions = [inspect.getmembers(cog, predicate=predicate) for cog in self.bot.cogs.values()]
-        functions = dict(zip(functions))
+        functions = dict(fn for cog in functions for fn in cog))
         functions = {k: v.callback if isinstance(v, commands.Command) else v
                      for k, v in functions.items() if not k.startswith(('_', 'cog'))}
         try:
