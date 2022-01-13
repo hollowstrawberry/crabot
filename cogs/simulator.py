@@ -3,10 +3,10 @@ import asyncio
 import random
 import re
 import aiosqlite as sql
-from typing import *
-from dataclasses importdataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from discord.ext import commands
+from typing import *
 
 GUILD_ID = 930471371128061962
 INPUT_CHANNEL_IDS = [930471825668988959, 930471371128061965]
