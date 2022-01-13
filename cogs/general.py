@@ -4,8 +4,6 @@ import discord
 import inspect
 import textwrap
 from discord.ext import commands
-from functools import reduce
-from operator import add
 from typing import *
 
 class General(commands.Cog):
@@ -43,7 +41,7 @@ class General(commands.Cog):
         """Sends the code that makes up a command or function of this bot"""
         predicate = lambda x: inspect.ismethod(x) or isinstance(x, commands.Command)
         functions = [inspect.getmembers(cog, predicate=predicate) for cog in self.bot.cogs.values()]
-        functions = dict(reduce(add, functions))
+        functions = dict(sum(functions))
         functions = {k: v.callback if isinstance(v, commands.Command) else v
                      for k, v in functions.items() if not k.startswith(('_', 'cog'))}
         try:
