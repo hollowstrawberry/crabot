@@ -3,6 +3,8 @@ import discord
 import textwrap
 from discord.ext import commands
 from discord.ext.commands import Context
+from functools import reduce
+from operator import add
 
 
 class General(commands.Cog):
@@ -22,14 +24,19 @@ class General(commands.Cog):
         print('say {msg}')
 
     @commands.command(aliases=["python"])
-    async def code(self, ctx: Context, cmd):
-        """Sends the code that makes up a command of this bot"""
+    async def code(self, ctx: Context, name):
+        """Sends the code that makes up a command or function of this bot"""
+        predicate = lambda x: inspect.ismethod(x) or isinstance(x, commands.Command)
+        functions = [inspect.getmembers(cog, predicate=predicate) for cog in self.bot.cogs.values()]
+        functions = dict(reduce(add, functions))
+        functions = {k: v.callback if isinstance(v, commands.Command) else v
+                     for k, v in functions.items() if not k.startswith(('_', 'cog'))}
         try:
-            code = inspect.getsource(self.bot.all_commands[cmd].callback)
+            code = inspect.getsource(functions[name])
             code = textwrap.dedent(code).replace("```", "`")[:1990]
             await ctx.send(f'```py\n{code}```')
         except KeyError:
-            await ctx.send("Can't find a command with that name")
+            await ctx.send("Can't find a function with that name")
 
 class EmbedHelpCommand(commands.HelpCommand):
     COLOR = discord.Color(int('FCDF99', 16))

@@ -1,36 +1,37 @@
 import os
+import io
 import re
 import json
 import hashlib
-import io
+import aiohttp
+import async_cse
 import discord
 import cv2
-import async_cse
-import aiohttp
 from PIL import Image
 from discord.ext import commands
 from discord.ext.commands import Context
 from typing import *
 
+DONUT_FILE = "donuts.json"
+REP_FILE = "reputation.json"
+IMG_DL = "download.png"
+IMG_OUT = "output.jpg"
+
+DONUTS = [
+    "<:bluedonut:879880267391705089>", "<:plaindonut:879880268431892560>",
+    "<:greendonut:879880268482232331>", "<:chocchocdonut:879880268658380840>",
+    "<:pinkdonut:879880268704538634>", "<:pinkdonut2:879880268704546826>",
+    "<:plaindonutfull:879892288870961262>", "<:whitedonut:879882533553184848>",
+    "<:chocdonut:879880269140725800>", "<:chocdonutfull:879892288111783966>",
+    "<:whitepinkdonut:879880269434339398>", "<:yellowdonut:879882288270303282>",
+    "<:pinkdonutfull:879892287839154268>", "<:chocplaindonut:879880269560152124>",
+    "<:whitechocdonut:879880269857976371>", "<:pinkplaindonut:879880269937647616>",
+    "<:whitewhitedonut:879892288241815663>", "<:reddonut:879880270105444413>",
+    "<:pinkpinkdonut:879880270168330260>", "<:pinkchocdonut:879880271829299220>"]
+
 
 class Fun(commands.Cog):
     """Commands you might actually want to use"""
-    DONUT_FILE = "donuts.json"
-    REP_FILE = "reputation.json"
-    IMG_DL = "download.png"
-    IMG_OUT = "output.jpg"
-    donuts = [
-        "<:bluedonut:879880267391705089>", "<:plaindonut:879880268431892560>",
-        "<:greendonut:879880268482232331>", "<:chocchocdonut:879880268658380840>",
-        "<:pinkdonut:879880268704538634>", "<:pinkdonut2:879880268704546826>",
-        "<:plaindonutfull:879892288870961262>", "<:whitedonut:879882533553184848>",
-        "<:chocdonut:879880269140725800>", "<:chocdonutfull:879892288111783966>",
-        "<:whitepinkdonut:879880269434339398>", "<:yellowdonut:879882288270303282>",
-        "<:pinkdonutfull:879892287839154268>", "<:chocplaindonut:879880269560152124>",
-        "<:whitechocdonut:879880269857976371>", "<:pinkplaindonut:879880269937647616>",
-        "<:whitewhitedonut:879892288241815663>", "<:reddonut:879880270105444413>",
-        "<:pinkpinkdonut:879880270168330260>", "<:pinkchocdonut:879880271829299220>"]
-
     def __init__(self, bot):
         self.bot = bot
         self.google = async_cse.Search(self.bot.token['google'])
@@ -118,17 +119,17 @@ class Fun(commands.Cog):
     async def donut(self, ctx: Context):
         """Gives you donuts"""
         try:
-            with open(self.DONUT_FILE, 'r') as file:
+            with open(DONUT_FILE, 'r') as file:
                 data = json.load(file)
         except FileNotFoundError:
-            with open(self.DONUT_FILE, 'w+'):
+            with open(DONUT_FILE, 'w+'):
                 data = {}
         count = data.get(str(ctx.author.id), 0) + 1
         data[str(ctx.author.id)] = count
-        with open(self.DONUT_FILE, 'w') as file:
+        with open(DONUT_FILE, 'w') as file:
             json.dump(data, file)
         hash = abs(int(hashlib.sha256(bytes(count)).hexdigest(), 16)) + 11
-        donut = self.donuts[hash % len(self.donuts)]
+        donut = DONUTS[hash % len(DONUTS)]
         await ctx.send(f'{count} {donut}')
         print(f'User {ctx.author.id} now has {count} donuts')
 
@@ -202,14 +203,14 @@ class Fun(commands.Cog):
             return await ctx.send("You can't give rep to yourself dummy")
 
         try:
-            with open(self.REP_FILE, 'r') as file:
+            with open(REP_FILE, 'r') as file:
                 data = json.load(file)
         except FileNotFoundError:
-            with open(self.REP_FILE, 'w+'):
+            with open(REP_FILE, 'w+'):
                 data = {}
         count = data.get(str(user.id), 0) + 1
         data[str(user.id)] = count
-        with open(self.REP_FILE, 'w') as file:
+        with open(REP_FILE, 'w') as file:
             json.dump(data, file)
         await ctx.send(f'{user.mention} +1 rep!')
         print(f'User {ctx.author.id} now has {count} rep')
@@ -229,19 +230,19 @@ class Fun(commands.Cog):
         elif isinstance(user, str):
             return await ctx.send("who?")
         # load image
-        await user.avatar_url.save(self.IMG_DL)
-        Image.open(self.IMG_DL).convert('RGB').resize((256, 256), Image.BICUBIC).save(self.IMG_OUT)
-        img = cv2.imread(self.IMG_OUT, cv2.IMREAD_COLOR)
+        await user.avatar_url.save(IMG_DL)
+        Image.open(IMG_DL).convert('RGB').resize((256, 256), Image.BICUBIC).save(IMG_OUT)
+        img = cv2.imread(IMG_OUT, cv2.IMREAD_COLOR)
         # apply morphology open to smooth the outline
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
         morph = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
         # brighten dark regions
         result = cv2.normalize(morph, None, 20, 255, cv2.NORM_MINMAX)
         # save and send
-        cv2.imwrite(self.IMG_OUT, result)
-        await ctx.send(file=discord.File(self.IMG_OUT))
-        os.remove(self.IMG_DL)
-        os.remove(self.IMG_OUT)
+        cv2.imwrite(IMG_OUT, result)
+        await ctx.send(file=discord.File(IMG_OUT))
+        os.remove(IMG_DL)
+        os.remove(IMG_OUT)
         print(f"Successfully painted user {user.id}")
 
     @commands.command(aliases=["showrep"])
@@ -250,7 +251,7 @@ class Fun(commands.Cog):
         if not user:
             user = ctx.author
         try:
-            with open(self.REP_FILE, 'r') as file:
+            with open(REP_FILE, 'r') as file:
                 data = json.load(file)
         except FileNotFoundError:
             data = {}
