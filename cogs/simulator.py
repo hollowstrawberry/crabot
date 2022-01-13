@@ -4,9 +4,7 @@ import random
 import re
 import aiosqlite as sql
 from typing import *
-from dataclasses import dataclass
-from functools import reduce
-from operator import add
+from dataclasses importdataclass
 from datetime import datetime, timedelta
 from discord.ext import commands
 
@@ -132,8 +130,8 @@ class Simulator(commands.Cog):
             words = count_words(self.models[user.id].model)
         else:
             messages = self.message_count
-            nodes = reduce(add, [count_nodes(x.model) for x in self.models.values()])
-            words = reduce(add, [count_words(x.model) for x in self.models.values()])
+            nodes = sum(count_nodes(x.model) for x in self.models.values())
+            words = sum(count_words(x.model) for x in self.models.values())
         await ctx.send(f"```yaml\nMessages: {messages:,}\nNodes: {nodes:,}\nWords: {words:,}```")
 
     @commands.command()
@@ -144,12 +142,12 @@ class Simulator(commands.Cog):
             if user.id not in self.models:
                 await ctx.send("This users' messages are not being recorded")
                 return
-            occurences = reduce(add, [x.get(word, 0) + x.get(sword, 0) for x in self.models[user.id].model.values()])
+            occurences = sum(x.get(word, 0) + x.get(sword, 0) for x in self.models[user.id].model.values())
             children = len(self.models[user.id].model.get(word, {}) | self.models[user.id].model.get(sword, {}))
         else:
-            occurences = reduce(add, [reduce(add, [x.get(word, 0) + x.get(sword, 0) for x in m.model.values()])
-                                      for m in self.models.values()])
-            children = reduce(add, [len(m.model.get(word, {}) | m.model.get(sword, {})) for m in self.models.values()])
+            occurences = sum(sum(x.get(word, 0) + x.get(sword, 0) for x in m.model.values())
+                             for m in self.models.values()])
+            children = sum(len(m.model.get(word, {}) | m.model.get(sword, {})) for m in self.models.values())
         await ctx.send(f"```yaml\nOccurrences: {occurences:,}\nWords that follow: {children:,}```")
 
     @commands.command()
