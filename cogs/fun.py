@@ -9,7 +9,6 @@ import discord
 import cv2
 from PIL import Image
 from discord.ext import commands
-from discord.ext.commands import Context
 from typing import *
 
 DONUT_FILE = "donuts.json"
@@ -34,16 +33,19 @@ class Fun(commands.Cog):
     """Commands you might actually want to use"""
     def __init__(self, bot):
         self.bot = bot
-        self.google = async_cse.Search(self.bot.token['google'])
+        with open('token.json') as f:
+            data = json.load(f)
+        self.google = async_cse.Search(data['google'])
+        self.wolfram = data['wolfram']
 
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
-    async def quick(self, ctx: Context, *, query: commands.clean_content):
+    async def quick(self, ctx: commands.Context, *, query: commands.clean_content):
         """Get answers to many questions thanks to WolframAlpha"""
         await ctx.channel.trigger_typing()
         async with aiohttp.ClientSession() as s:
             async with s.get(
                     'https://api.wolframalpha.com/v2/result',
-                    params={'i': query, 'appid': self.bot.token['wolfram']}
+                    params={'i': query, 'appid': self.wolfram}
             ) as res:
                 text = await res.text()
                 if text == "No short answer available":
@@ -56,7 +58,7 @@ class Fun(commands.Cog):
                 print(f"quick {query}")
 
     @commands.command(aliases=['search'])
-    async def google(self, ctx: Context, *, query: commands.clean_content):
+    async def google(self, ctx: commands.Context, *, query: commands.clean_content):
         """Search something on Google"""
         await ctx.channel.trigger_typing()
         try:
@@ -74,7 +76,7 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def rate(self, ctx: Context, *, thing):
+    async def rate(self, ctx: commands.Context, *, thing):
         """Gives a unique rating to anything you want"""
         thing = thing.lower()
         # Invert bot-mention temporarily
@@ -94,29 +96,29 @@ class Fun(commands.Cog):
         thing = re.sub(r'MY', 'my', thing)
         # Generate deterministic random value
         formatted = ''.join(ch for ch in thing if ch.isalnum()).encode('utf-8')
-        hash = abs(int(hashlib.sha512(formatted).hexdigest(), 16))
+        hashed = abs(int(hashlib.sha512(formatted).hexdigest(), 16))
         if server:
-            hash += ctx.guild.id
+            hashed += ctx.guild.id
         if author:
-            hash += ctx.author.id
+            hashed += ctx.author.id
         elif mention:
-            hash += int(mention.group(1))
+            hashed += int(mention.group(1))
             thing = re.sub('your', f"{mention.group()}'s", thing)  # Revert mentions
             thing = re.sub('you', mention.group(), thing)
         # Assign score from random value
         if thing.endswith(('ism', 'phobia', 'philia')):
-            rating = hash % 3
+            rating = hashed % 3
         elif re.search(r'(orange|food|eat|cry|rights)', thing):
-            rating = hash % 4 + 7
+            rating = hashed % 4 + 7
         else:
-            rating = hash % 11
+            rating = hashed % 11
 
         await ctx.send(f'I give {thing} a {rating}/10')
         print(f'rate {thing} {rating}')
 
     @commands.command()
     @commands.cooldown(rate=5, per=5, type=commands.BucketType.channel)
-    async def donut(self, ctx: Context):
+    async def donut(self, ctx: commands.Context):
         """Gives you donuts"""
         try:
             with open(DONUT_FILE, 'r') as file:
@@ -128,13 +130,13 @@ class Fun(commands.Cog):
         data[str(ctx.author.id)] = count
         with open(DONUT_FILE, 'w') as file:
             json.dump(data, file)
-        hash = abs(int(hashlib.sha256(bytes(count)).hexdigest(), 16)) + 11
-        donut = DONUTS[hash % len(DONUTS)]
+        hashed = abs(int(hashlib.sha256(bytes(count)).hexdigest(), 16)) + 11
+        donut = DONUTS[hashed % len(DONUTS)]
         await ctx.send(f'{count} {donut}')
         print(f'User {ctx.author.id} now has {count} donuts')
 
     @staticmethod
-    async def get_emojis(ctx: Context) -> Optional[List[Tuple[str]]]:
+    async def get_emojis(ctx: commands.Context) -> Optional[List[Tuple[str]]]:
         reference = ctx.message.reference
         if not reference:
             await ctx.send("Reply to a message with this command to steal an emoji")
@@ -150,7 +152,7 @@ class Fun(commands.Cog):
         return emojis
 
     @commands.group()
-    async def steal(self, ctx: Context):
+    async def steal(self, ctx: commands.Context):
         """Steals emojis you reply to"""
         if ctx.invoked_subcommand:
             return
@@ -160,7 +162,7 @@ class Fun(commands.Cog):
         await ctx.send('\n'.join(links))
 
     @steal.command()
-    async def upload(self, ctx: Context):
+    async def upload(self, ctx: commands.Context):
         """Steals emojis you reply to, and uploads it to the server"""
         if not ctx.message.author.guild_permissions.manage_emojis:
             await ctx.send("You don't have permission to manage emojis")
@@ -188,7 +190,7 @@ class Fun(commands.Cog):
 
     @commands.command(name="+1", aliases=["rep", "giverep"])
     @commands.cooldown(rate=1, per=3600, type=commands.BucketType.user)
-    async def rep(self, ctx: Context, user: discord.User = None):
+    async def rep(self, ctx: commands.Context, user: discord.User = None):
         """Gives a reputation point, you can give 1 per hour"""
         if not user:
             if ctx.message.reference:
@@ -216,12 +218,12 @@ class Fun(commands.Cog):
         print(f'User {ctx.author.id} now has {count} rep')
 
     @rep.error
-    async def rep_error(self, ctx: Context, error: commands.CommandError):
+    async def rep_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send("You already gave a rep in the last hour!")
 
     @commands.command(aliases=["paintme", "paint", "drawme"])
-    async def draw(self, ctx: Context, user: Union[discord.User, str] = None):
+    async def draw(self, ctx: commands.Context, user: Union[discord.User, str] = None):
         """Produces a painting of you or someone else"""
         if user == "me" or user is None:
             user = ctx.author
@@ -246,7 +248,7 @@ class Fun(commands.Cog):
         print(f"Successfully painted user {user.id}")
 
     @commands.command(aliases=["showrep"])
-    async def getrep(self, ctx: Context, user: discord.User = None):
+    async def getrep(self, ctx: commands.Context, user: discord.User = None):
         """Gets the reputation points for a user"""
         if not user:
             user = ctx.author
@@ -265,7 +267,7 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def pp(self, ctx: Context):
+    async def pp(self, ctx: commands.Context):
         """Evaluates your pp"""
         pp = ctx.author.id % 13
         await ctx.send(f'Your pp size is {pp} inches')
