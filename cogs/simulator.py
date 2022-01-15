@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from discord.ext import commands
 from typing import *
+from config import HOME_GUILD_ID
 
-GUILD_ID = 930471371128061962
 INPUT_CHANNEL_IDS = [930471825668988959, 930471371128061965]
 OUTPUT_CHANNEL_ID = 930472235527983174
 ROLE_ID = 930489841421004830
@@ -265,7 +265,7 @@ class Simulator(commands.Cog):
         """Set up the simulator"""
         try:
             # discord entities
-            self.guild = self.bot.get_guild(GUILD_ID)
+            self.guild = self.bot.get_guild(HOME_GUILD_ID)
             if self.guild is None: raise KeyError(self.guild.__name__)
             self.role = self.guild.get_role(ROLE_ID)
             self.input_channels = [self.guild.get_channel(i) for i in INPUT_CHANNEL_IDS]
