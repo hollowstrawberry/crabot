@@ -5,6 +5,7 @@ import inspect
 import textwrap
 from discord.ext import commands
 from typing import *
+from config import HOME_GUILD_ID
 
 class General(commands.Cog):
     """General commands"""
@@ -21,7 +22,7 @@ class General(commands.Cog):
     def get_prefix(self, bot: commands.Bot, message: discord.Message):
         if not self.prefix:
             self.prefix = re.compile(fr'^(crab(ot)?|<@!?{bot.user.id}>),? ?', re.IGNORECASE)
-        if message.guild and message.guild.id == 930471371128061962 and message.content.startswith('!'):
+        if message.guild and message.guild.id == HOME_GUILD_ID and message.content.startswith('!'):
             return '!'
         return match.group() if (match := self.prefix.match(message.content)) else 'crab '
 
