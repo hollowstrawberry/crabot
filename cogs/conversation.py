@@ -101,7 +101,7 @@ class Conversation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if "NOW" in message.content and ctx.guild.id == 930471371128061962:
+        if "NOW" in message.content and message.guild.id == 930471371128061962:
             await message.add_reaction('<a:NOW:930543555682926644>')
 
         prefix = await self.bot.get_prefix(message)
