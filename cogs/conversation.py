@@ -107,6 +107,9 @@ class Conversation(commands.Cog):
         content = message.content[len(prefix):]
         ctx = await self.bot.get_context(message)
 
+        if "NOW" in message.content and ctx.guild.id == 930471371128061962:
+            await message.add_reaction('<a:NOW:930543555682926644>')
+
         if re.match(r"(existential crisis|a?re? y?o?u real|a?re? y?o?u human|a?re? y?o?u a bot|what is real"
                     r"|what'? ?i?s the meaning of life|when will it end|w?h?y a?re? we here) ?\??",
                     content):
