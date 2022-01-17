@@ -106,7 +106,7 @@ class Conversation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if now_regex.match(message.content):
+        if self.now_regex.match(message.content):
             await message.add_reaction(self.now_emoji)
 
         prefix = await self.bot.get_prefix(message)
