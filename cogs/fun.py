@@ -11,6 +11,8 @@ from PIL import Image
 from discord.ext import commands
 from typing import *
 
+import secret
+
 DONUT_FILE = "donuts.json"
 REP_FILE = "reputation.json"
 IMG_DL = "download.png"
@@ -33,10 +35,7 @@ class Fun(commands.Cog):
     """Commands you might actually want to use"""
     def __init__(self, bot):
         self.bot = bot
-        with open('token.json') as f:
-            data = json.load(f)
-        self.google = async_cse.Search(data['google'])
-        self.wolfram = data['wolfram']
+        self.google = async_cse.Search(secret.GOOGLE)
 
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
     async def quick(self, ctx: commands.Context, *, query: commands.clean_content):
@@ -45,7 +44,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as s:
             async with s.get(
                     'https://api.wolframalpha.com/v2/result',
-                    params={'i': query, 'appid': self.wolfram}
+                    params={'i': query, 'appid': secret.WOLFRAM}
             ) as res:
                 text = await res.text()
                 if text == "No short answer available":
