@@ -2,7 +2,7 @@ donuts.json
 genshin.json
 reputation.json
 token.json
-secret
+secret.py
 *.db
 *.sqlite
 
