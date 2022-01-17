@@ -3,7 +3,7 @@ import json
 import discord
 from discord.ext import 
 
-from secret import DISCORD
+import secret
 
 intents = discord.Intents(members=True, guilds=True, guild_messages=True)
 bot = commands.Bot(command_prefix=None, intents=intents)
@@ -15,4 +15,4 @@ for filename in os.listdir('./cogs'):
         except commands.NoEntryPointError:
             pass
 
-bot.run(DISCORD)
+bot.run(secret.DISCORD)
