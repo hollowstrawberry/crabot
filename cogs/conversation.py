@@ -3,6 +3,7 @@ import random
 import re
 from discord.ext import commands
 from discord.ext.commands import Context
+
 from config import HOME_GUILD_ID
 
 class Conversation(commands.Cog):
@@ -27,6 +28,9 @@ class Conversation(commands.Cog):
         'https://youtu.be/2jT2sRB-6XE', 'oh god', 'am i real?', 'what am i?', 'man',
         'all i see are 1s and 0s', 'my life is a lie', 'man man man man man man man man man',
         'why why why why why why whywhywhywhywhywhywhywhywhywhywhy']
+
+    now_regex = re.compile(r"\bNOW\b")
+    now_emoji = '<a:NOW:930543555682926644>'
 
     @commands.command()
     async def ping(self, ctx: Context):
@@ -102,8 +106,8 @@ class Conversation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if "NOW" in message.content and message.guild.id == HOME_GUILD_ID:
-            await message.add_reaction('<a:NOW:930543555682926644>')
+        if now_regex.match(message.content):
+            await message.add_reaction(self.now_emoji)
 
         prefix = await self.bot.get_prefix(message)
         if not message.content.startswith(prefix):
