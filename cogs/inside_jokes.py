@@ -31,6 +31,7 @@ class InsideJokes(commands.Cog):
             await self.run()
 
     async def run(self):
+        self.running = True
         while self.running:
             now = datetime.now()
 
