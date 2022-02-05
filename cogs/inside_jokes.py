@@ -33,9 +33,9 @@ class InsideJokes(commands.Cog):
     async def run(self):
         self.running = True
         while self.running:
-            now = datetime.now()
+            now = datetime.utcnow()
 
-            if now.hour+3 == 4 and now.minute == 20:
+            if now.hour-3 == 4 and now.minute == 20:
                 try:
                     await self.fourtwenty.send("420")
                 except Exception as error:
