@@ -328,7 +328,7 @@ class Simulator(commands.Cog):
                                 content=content,
                                 allowed_mentions=discord.AllowedMentions.none())
 
-    def generate_message(self) -> (int, str):
+    def generate_message(self) -> Tuple[int, str]:
         """Generate text based on the models"""
         user_id, = random.choices(population=list(self.models.keys()),
                                   weights=[x.frequency for x in self.models.values()],
