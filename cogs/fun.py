@@ -59,7 +59,7 @@ class Fun(commands.Cog):
     @commands.command()
     async def define(self, ctx: commands.Context, *, query: commands.clean_content):
         """Get a word definition thanks to WolframAlpha"""
-        await self.quick(ctx, query: f"define {query}")
+        await self.quick(ctx, query=f"define {query}")
 
     @commands.command(aliases=['search'])
     async def google(self, ctx: commands.Context, *, query: commands.clean_content):
