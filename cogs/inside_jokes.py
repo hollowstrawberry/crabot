@@ -33,24 +33,21 @@ class InsideJokes(commands.Cog):
     async def run(self):
         self.running = True
         while self.running:
-            now = datetime.utcnow()
+            try:
+                now = datetime.utcnow()
 
-            if now.hour-3 == 4 and now.minute == 20:
-                try:
+                if now.hour-4 == 4 and now.minute == 20:
                     await self.fourtwenty.send("420")
-                except Exception as error:
-                    print(error)
 
-            for user in self.home.members:
-                if user.activity and user.activity.name == 'League of Legends' and user.activity.created_at:
-                    if user.id not in self.sentwarn and now - user.activity.created_at > timedelta.min(30):
-                        try:
+                for user in self.home.members:
+                    if user.activity and user.activity.name == 'League of Legends':
+                        if user.id not in self.sentwarn:
                             await self.home_channel.send(f'{user.mention} stop playing league of legends stinky')
-                        except Exception as error:
-                            print(error)
-                        self.sentwarn.append(user.id)
-                elif user.id in self.sentwarn:
-                    self.sentwarn.remove(user.id)
+                            self.sentwarn.append(user.id)
+                    elif user.id in self.sentwarn:
+                        self.sentwarn.remove(user.id)
+            except Exception as error:
+                print(error)
 
             await asyncio.sleep(30)
 
