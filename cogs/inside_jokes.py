@@ -49,7 +49,7 @@ class InsideJokes(commands.Cog):
             except Exception as error:
                 print(error)
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(60)
 
 def setup(bot: commands.Bot):
     bot.add_cog(InsideJokes(bot))
