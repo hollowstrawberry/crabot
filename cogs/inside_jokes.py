@@ -41,7 +41,7 @@ class InsideJokes(commands.Cog):
 
                 for user in self.home.members:
                     if user.activity and user.activity.name == 'League of Legends':
-                        if user.id not in self.sentwarn:
+                        if user.id not in self.sentwarn and user.activity.start and (now - user.activity.start) > timedelta(hours=1):
                             await self.home_channel.send(f'{user.mention} stop playing league of legends stinky')
                             self.sentwarn.append(user.id)
                     elif user.id in self.sentwarn:
