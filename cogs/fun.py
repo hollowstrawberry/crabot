@@ -89,7 +89,8 @@ class Fun(commands.Cog):
                 raise Exception()
         except Exception:
             await ctx.send("Failed to translate, sorry.")
-        ctx.send(result)
+            return
+        await ctx.send(result)
 
     @commands.command()
     async def rate(self, ctx: commands.Context, *, thing):
