@@ -1,6 +1,7 @@
 aiohttp >= 3.7.4.post0
 aiosqlite >= 0.17.0
 async_cse >= 0.3.0
+async_google_trans_new >= 1.4.5
 discord.py >= 1.7.3
 opencv_python_headless >= 4.5.3.56
 Pillow >= 9.2.0
