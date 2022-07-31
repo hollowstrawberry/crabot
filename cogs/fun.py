@@ -7,6 +7,7 @@ import aiohttp
 import async_cse
 import discord
 import cv2
+import async_google_trans_new as googletrans
 from PIL import Image
 from discord.ext import commands
 from typing import *
@@ -36,6 +37,7 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.google = async_cse.Search(secret.GOOGLE)
+        self.translator = googletrans.AsyncTranslator()
 
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
     async def quick(self, ctx: commands.Context, *, query: commands.clean_content):
@@ -78,6 +80,16 @@ class Fun(commands.Cog):
         if result[0].image_url:
             embed.set_thumbnail(url=result[0].image_url)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def translate(self, ctx: commands.Context, *, query: commands.clean_content):
+        try:
+            result = await self.translator.translate(query, "en")
+            if not result:
+                raise Exception()
+        except Exception:
+            await ctx.send("Failed to translate, sorry.")
+        ctx.send(result)
 
     @commands.command()
     async def rate(self, ctx: commands.Context, *, thing):
