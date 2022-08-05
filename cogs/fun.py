@@ -84,6 +84,7 @@ class Fun(commands.Cog):
     @commands.command()
     async def translate(self, ctx: commands.Context, *, query: Optional[commands.clean_content]):
         """Translate some text or a message you reply to."""
+        message = ctx.message
         if not query and ctx.message.reference:
             message = ctx.message.reference.cached_message or await ctx.channel.fetch_message(ctx.message.reference.message_id)
             query = message.content if message else None
@@ -97,7 +98,7 @@ class Fun(commands.Cog):
         except Exception:
             await ctx.send("`Failed to translate, sorry.`")
             return
-        await ctx.send(result)
+        await ctx.send(result, reference=message, mention_author=False)
 
     @commands.command()
     async def rate(self, ctx: commands.Context, *, thing):
