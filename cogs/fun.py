@@ -55,8 +55,7 @@ class Fun(commands.Cog):
                     to_send = "I have no idea what you're asking but the answer is yes"
                 else:
                     to_send = text
-                await ctx.send(to_send)
-                print(f"quick {query}")
+                await ctx.reply(to_send)
 
     @commands.command()
     async def define(self, ctx: commands.Context, *, query: commands.clean_content):
@@ -73,7 +72,7 @@ class Fun(commands.Cog):
             await ctx.send(f"`{type(error).__name__}: {error}`")
             return
         if not result or not result[0]:
-            await ctx.send("No results")
+            await ctx.send("`No results`")
             return
         embed = discord.Embed(title=result[0].title[:255], description=result[0].description[:1990],
                               url=result[0].url, color=0xffffff)
