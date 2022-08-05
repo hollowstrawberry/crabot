@@ -285,7 +285,7 @@ class Simulator(commands.Cog):
                 await db.commit()
                 async with db.execute(f"SELECT * FROM {DB_TABLE_MESSAGES}") as cursor:
                     async for row in cursor:
-                        self.add_message(int(row[0]), row[1])
+                        self.add_message(row[1], row[2])
                         count += 1
             print(f"Model built with {count} messages")
         except Exception as error:
