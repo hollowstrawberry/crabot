@@ -50,7 +50,7 @@ class Fun(commands.Cog):
             ) as res:
                 text = await res.text()
                 if text == "No short answer available":
-                    to_send = "<a:vibebones:756859685281202186>"
+                    to_send = "The answer is too complicated."
                 elif text == "Wolfram|Alpha did not understand your input":
                     to_send = "I have no idea what you're asking but the answer is yes"
                 else:
@@ -70,7 +70,7 @@ class Fun(commands.Cog):
         try:
             result = await self.google.search(str(query), safesearch=not ctx.channel.nsfw)
         except Exception as error:
-            await ctx.send(f"{type(error).__name__}: {error}")
+            await ctx.send(f"`{type(error).__name__}: {error}`")
             return
         if not result or not result[0]:
             await ctx.send("No results")
@@ -82,13 +82,20 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def translate(self, ctx: commands.Context, *, query: commands.clean_content):
+    async def translate(self, ctx: commands.Context, *, query: Optional[commands.clean_content]):
+        """Translate some text or a message you reply to."""
+        if not query and ctx.message.reference:
+            message = ctx.message.reference.cached_message or await ctx.channel.fetch_message(ctx.message.reference.message_id)
+            query = message.content if message else None
+        if not query:
+            await ctx.send("`Nothing to translate. Tip: You can reply to a message with this command to translate it.`")
+            return
         try:
             result = await self.translator.translate(query, "en")
             if not result:
                 raise Exception()
         except Exception:
-            await ctx.send("Failed to translate, sorry.")
+            await ctx.send("`Failed to translate, sorry.`")
             return
         await ctx.send(result)
 
