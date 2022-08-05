@@ -166,16 +166,17 @@ class Simulator(commands.Cog):
                 await db.execute(f"DELETE FROM {DB_TABLE_MESSAGES}")
                 await db.commit()
                 start_date = datetime.now() - timedelta(days=days)
-                async for message in ctx.channel.history(after=start_date, limit=None):
-                    if not self.feeding:
-                        break
-                    if message.author.bot:
-                        continue
-                    if self.add_message(message=message):
-                        await insert_message_db(message, db)
-                        if self.message_count % COMMIT_SIZE == 0:
-                            await db.commit()
-                await db.commit()
+                for channel in self.input_channels:
+                    async for message in channel.history(after=start_date, limit=None):
+                        if not self.feeding:
+                            break
+                        if message.author.bot:
+                            continue
+                        if self.add_message(message=message):
+                            await insert_message_db(message, db)
+                            if self.message_count % COMMIT_SIZE == 0:
+                                await db.commit()
+                    await db.commit()
         except Exception as error:
             await ctx.send(f"{type(error).__name__}: {error}\n"
                            f"Loaded {self.message_count} messages, "
