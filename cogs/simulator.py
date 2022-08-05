@@ -44,12 +44,12 @@ def format_message(message: discord.Message) -> str:
     return content
 
 async def insert_message_db(message: discord.Message, db: sql.Connection):
-    await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?);',
-                     [str(message.author.id), format_message(message)])
+    await db.execute(f'INSERT INTO {DB_TABLE_MESSAGES} VALUES (?, ?, ?);',
+                     [message.id, message.author.id, format_message(message)])
 
 async def delete_message_db(message: discord.Message, db: sql.Connection):
-    await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE user_id=? and content=? LIMIT 1;',
-                     [str(message.author.id), format_message(message)])
+    await db.execute(f'DELETE FROM {DB_TABLE_MESSAGES} WHERE id=? LIMIT 1;',
+                     [message.id])
 
 @dataclass
 class UserModel:
@@ -281,7 +281,7 @@ class Simulator(commands.Cog):
             count = 0
             async with sql.connect(DB_FILE) as db:
                 await db.execute(f"CREATE TABLE IF NOT EXISTS {DB_TABLE_MESSAGES} "
-                                 f"(user_id TEXT NOT NULL, content TEXT NOT NULL);")
+                                 f"(id INTEGER PRIMARY KEY, user_id INTEGER, content TEXT NOT NULL);")
                 await db.commit()
                 async with db.execute(f"SELECT * FROM {DB_TABLE_MESSAGES}") as cursor:
                     async for row in cursor:
