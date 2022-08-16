@@ -6,8 +6,8 @@ from typing import *
 from config import HOME_GUILD_ID
 
 HOME_CHANNEL_ID = 930471825668988959
-FOURTWENTY_GUILD_ID = 755538135491805305
-FOURTWENTY_CHANNEL_ID = 760037213702193152
+FOURTWENTY_GUILD_ID = HOME_GUILD_ID
+FOURTWENTY_CHANNEL_ID = 930471947563855882
 
 class InsideJokes(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -15,7 +15,7 @@ class InsideJokes(commands.Cog):
         self.running = False
         self.fourtwenty: Optional[discord.Channel] = None
         self.home: Optional[discord.Guild] = None
-        self.sentwarn = []
+        self.sendwarn = []
         if self.bot.is_ready():
             asyncio.create_task(self.on_ready())
 
@@ -34,18 +34,18 @@ class InsideJokes(commands.Cog):
         self.running = True
         while self.running:
             try:
-                now = datetime.utcnow()
+                now = datetime.now()
 
-                if now.hour-4 == 4 and now.minute == 20:
+                if now.hour == 4 and now.minute == 20:
                     await self.fourtwenty.send("420")
 
                 for user in self.home.members:
                     if user.activity and user.activity.name == 'League of Legends':
-                        if user.id not in self.sentwarn and user.activity.start and (now - user.activity.start) > timedelta(minutes=40):
-                            await self.home_channel.send(f'{user.mention} stop playing league of legends stinky')
-                            self.sentwarn.append(user.id)
-                    elif user.id in self.sentwarn:
-                        self.sentwarn.remove(user.id)
+                        if user.id not in self.sendwarn and user.activity.start and (now - user.activity.start) > timedelta(minutes=50):
+                            self.sendwarn.append(user.id)
+                    elif user.id in self.sendwarn:
+                        await self.home_channel.send(f'{user.mention} that was a long ass match, did you win?')
+                        self.sendwarn.remove(user.id)
             except Exception as error:
                 print(error)
 
