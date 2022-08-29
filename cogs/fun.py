@@ -186,7 +186,7 @@ class Fun(commands.Cog):
         await ctx.send('\n'.join(links))
 
     @steal.command()
-    async def upload(self, ctx: commands.Context):
+    async def upload(self, ctx: commands.Context, name=None):
         """Steals emojis you reply to, and uploads it to the server"""
         if not ctx.message.author.guild_permissions.manage_emojis:
             await ctx.send("You don't have permission to manage emojis")
@@ -203,7 +203,7 @@ class Fun(commands.Cog):
                     await ctx.send(f"Couldn't download {emoji[1]}, {type(error).__name__}: {error}")
                     return
                 try:
-                    added = await ctx.guild.create_custom_emoji(name=emoji[1], image=image)
+                    added = await ctx.guild.create_custom_emoji(name=name or emoji[1], image=image)
                 except Exception as error:
                     await ctx.send(f"Couldn't upload {emoji[1]}, {type(error).__name__}: {error}")
                     return
