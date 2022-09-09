@@ -41,10 +41,10 @@ class InsideJokes(commands.Cog):
 
                 for user in self.home.members:
                     if user.activity and user.activity.name == 'League of Legends':
-                        if user.id not in self.sendwarn and user.activity.start and (now - user.activity.start) > timedelta(minutes=45):
+                        if user.id not in self.sendwarn and user.activity.start and (now - user.activity.start) > timedelta(minutes=40):
+                            await self.home_channel.send(f'Are you winning {user.mention}?')
                             self.sendwarn.append(user.id)
                     elif user.id in self.sendwarn:
-                        await self.home_channel.send(f'{user.mention} that was a long ass match, did you win?')
                         self.sendwarn.remove(user.id)
             except Exception as error:
                 print(error)
