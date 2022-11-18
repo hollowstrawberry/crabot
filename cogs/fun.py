@@ -256,7 +256,7 @@ class Fun(commands.Cog):
         elif isinstance(user, str):
             return await ctx.send("who?")
         # load image
-        await user.avatar_url.save(IMG_DL)
+        await user.avatar.save(IMG_DL)
         Image.open(IMG_DL).convert('RGB').resize((256, 256), Image.BICUBIC).save(IMG_OUT)
         img = cv2.imread(IMG_OUT, cv2.IMREAD_COLOR)
         # apply morphology open to smooth the outline
@@ -269,10 +269,9 @@ class Fun(commands.Cog):
         await ctx.send(file=discord.File(IMG_OUT))
         os.remove(IMG_DL)
         os.remove(IMG_OUT)
-        print(f"Successfully painted user {user.id}")
 
     @commands.command(aliases=["showrep"])
-    async def getrep(self, ctx: commands.Context, user: discord.User = None):
+    async def getrep(self, ctx: commands.Context, user: discord.Member = None):
         """Gets the reputation points for a user"""
         if not user:
             user = ctx.author
@@ -284,7 +283,7 @@ class Fun(commands.Cog):
         count = data.get(str(user.id), 0)
 
         embed = discord.Embed(color=int('3B88C3', 16))
-        embed.set_author(name=user.display_name, icon_url=str(user.avatar_url))
+        embed.set_author(name=user.display_name, icon_url=str(user.avatar.url))
         numemoji = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
         num = "".join(numemoji[int(d)] for d in str(count))
         embed.description = f'**Reputation points:** {num}'
@@ -295,7 +294,6 @@ class Fun(commands.Cog):
         """Evaluates your pp"""
         pp = ctx.author.id % 13
         await ctx.send(f'Your pp size is {pp} inches')
-        print(f'pp {ctx.author.id} {pp}')
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Fun(bot))
