@@ -147,5 +147,5 @@ class Genshin(commands.Cog):
                     s += f'\n{value} x {key}{" ⭐⭐⭐⭐⭐" if key in fivestars else ""}'
             await ctx.send(embed=discord.Embed(title="Your inventory", description=s + "```", color=0x00ff00))
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Genshin(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Genshin(bot))

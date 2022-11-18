@@ -120,4 +120,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
 secret.py
+.idea/

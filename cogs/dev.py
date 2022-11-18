@@ -61,7 +61,7 @@ class Dev(commands.Cog):
     async def reload(self, ctx: Context):
         """Reloads the bot's cogs"""
         for cog in tuple(self.bot.extensions.keys()):
-            self.bot.reload_extension(cog)
+            await self.bot.reload_extension(cog)
         await ctx.message.add_reaction('✅')
 
     @commands.command()
@@ -77,7 +77,7 @@ class Dev(commands.Cog):
         # Existing cogs
         for cog in cogs:
             try:
-                self.bot.reload_extension(cog)
+                await self.bot.reload_extension(cog)
             except commands.ExtensionFailed as e:
                 output += f'\n\n{e}'
         # New cogs
@@ -85,7 +85,7 @@ class Dev(commands.Cog):
             newcog = f'cogs.{filename[:-3]}'
             if filename.endswith('.py') and newcog not in cogs:
                 try:
-                    self.bot.load_extension(newcog)
+                    await self.bot.load_extension(newcog)
                 except commands.NoEntryPointError:
                     pass
                 except commands.ExtensionFailed as e:
@@ -100,7 +100,7 @@ class Dev(commands.Cog):
     async def restart(self, ctx: Context):
         """Shuts down the bot"""
         await ctx.message.add_reaction('<a:NOW:930543555682926644>')
-        await self.bot.logout()
+        await self.bot.close()
         sys.exit('Manual restart')
 
     @commands.Cog.listener()
@@ -111,5 +111,5 @@ class Dev(commands.Cog):
             print(error)
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Dev(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Dev(bot))

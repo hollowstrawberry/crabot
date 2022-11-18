@@ -1,18 +1,20 @@
 import os
-import json
 import discord
+import asyncio
 from discord.ext import commands
 
 import secret
 
-intents = discord.Intents(members=True, guilds=True, guild_messages=True, presences=True)
-bot = commands.Bot(command_prefix=None, intents=intents)
+bot = commands.Bot(command_prefix=None, intents=discord.Intents.all())
 
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        try:
-            bot.load_extension(f'cogs.{filename[:-3]}')
-        except commands.NoEntryPointError:
-            pass
+async def main():
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            try:
+                await bot.load_extension(f'cogs.{filename[:-3]}')
+            except commands.NoEntryPointError:
+                pass
+    await bot.start(secret.DISCORD)
 
-bot.run(secret.DISCORD)
+if __name__ == "__main__":
+    asyncio.run(main())

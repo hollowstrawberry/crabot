@@ -42,7 +42,7 @@ class Fun(commands.Cog):
     @commands.command(aliases=['quick,', 'math', 'wolfram'])
     async def quick(self, ctx: commands.Context, *, query: commands.clean_content):
         """Get answers to many questions thanks to WolframAlpha"""
-        await ctx.channel.trigger_typing()
+        await ctx.channel.typing()
         async with aiohttp.ClientSession() as s:
             async with s.get(
                     'https://api.wolframalpha.com/v2/result',
@@ -65,7 +65,7 @@ class Fun(commands.Cog):
     @commands.command(aliases=['search'])
     async def google(self, ctx: commands.Context, *, query: commands.clean_content):
         """Search something on Google"""
-        await ctx.channel.trigger_typing()
+        await ctx.channel.typing()
         try:
             result = await self.google.search(str(query), safesearch=not ctx.channel.nsfw)
         except Exception as error:
@@ -297,5 +297,5 @@ class Fun(commands.Cog):
         await ctx.send(f'Your pp size is {pp} inches')
         print(f'pp {ctx.author.id} {pp}')
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Fun(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Fun(bot))

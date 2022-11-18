@@ -4,8 +4,6 @@ import re
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from config import HOME_GUILD_ID
-
 class Conversation(commands.Cog):
     """Different responses and reactions"""
     def __init__(self, bot: commands.Bot):
@@ -142,5 +140,5 @@ class Conversation(commands.Cog):
             return await self.workout(ctx)
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Conversation(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Conversation(bot))
